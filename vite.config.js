@@ -25,8 +25,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Exclude HTML from precache — always fetch fresh so updates propagate immediately.
-        // JS/CSS assets are content-hashed so CacheFirst is safe for those.
+        importScripts: ['/sw-push.js'],
         globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],

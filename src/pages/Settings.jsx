@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from '../services/auth'
 import { clearKey } from '../store/cryptoStore'
 import { useAuth } from '../hooks/useAuth'
 import { useEntries } from '../hooks/useEntries'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { requestPermission, subscribeToPush, unsubscribeFromPush, updateReminderSettings, fetchSubscription, isSubscribed } from '../services/notifications'
 import db from '../db'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
@@ -125,6 +126,53 @@ export default function Settings() {
     localStorage.setItem('solace_daily_prompt', val ? 'true' : 'false')
   }
 
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+  const [reminderTime, setReminderTime] = useState('21:00')
+  const [streakNudge, setStreakNudge] = useState(false)
+  const [reminderLoading, setReminderLoading] = useState(false)
+
+  useEffect(() => {
+    if (!user) return
+    Promise.all([isSubscribed(), fetchSubscription(user.id)]).then(([subscribed, row]) => {
+      setReminderEnabled(subscribed)
+      if (row) {
+        setReminderTime(row.reminder_time)
+        setStreakNudge(row.streak_nudge)
+      }
+    }).catch(() => {})
+  }, [user])
+
+  const handleReminderToggle = async (val) => {
+    if (reminderLoading) return
+    setReminderLoading(true)
+    try {
+      if (val) {
+        const granted = await requestPermission()
+        if (!granted) { setReminderLoading(false); return }
+        await subscribeToPush(user.id, reminderTime, streakNudge)
+        setReminderEnabled(true)
+      } else {
+        await unsubscribeFromPush(user.id)
+        setReminderEnabled(false)
+      }
+    } catch { /* ignore */ }
+    setReminderLoading(false)
+  }
+
+  const handleReminderTimeChange = async (val) => {
+    setReminderTime(val)
+    if (reminderEnabled) {
+      try { await updateReminderSettings(user.id, val, streakNudge) } catch { /* ignore */ }
+    }
+  }
+
+  const handleStreakNudgeToggle = async (val) => {
+    setStreakNudge(val)
+    if (reminderEnabled) {
+      try { await updateReminderSettings(user.id, reminderTime, val) } catch { /* ignore */ }
+    }
+  }
+
   const initial = user?.email?.[0]?.toUpperCase() || 'J'
   const entryCount = entries.length
   const wordCount = entries.reduce((sum, e) => sum + (e.wordCount || 0), 0)
@@ -206,8 +254,37 @@ export default function Settings() {
 
         <Card header="Practice" t={t}>
           <Row t={t} icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: 'p' }} title="Daily prompt" checked={promptEnabled} onToggle={handlePromptToggle} />
-          <Row t={t} icon={{ bg: 'var(--sage-100)', fg: '#5C6F4F', glyph: 'r' }} title="Reminder" detail="Coming soon" />
           <Row t={t} icon={{ bg: 'var(--bg-warm)', fg: 'var(--ink-700)', glyph: 'm' }} title="Mood tracking" detail="On" last />
+        </Card>
+
+        <Card header="Reminders" t={t}>
+          <Row t={t}
+            icon={{ bg: 'var(--sage-100)', fg: '#5C6F4F', glyph: 'r' }}
+            title={reminderLoading ? 'Setting up…' : 'Daily reminder'}
+            checked={reminderEnabled}
+            onToggle={handleReminderToggle}
+            last={!reminderEnabled}
+          />
+          {reminderEnabled && (
+            <div style={{ padding: t ? '0 28px 0 80px' : '0 16px 0 52px', borderBottom: '1px solid var(--hairline)', minHeight: t ? 72 : 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 20 : 15, color: 'var(--ink-900)', fontWeight: 500 }}>Time</div>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={e => handleReminderTimeChange(e.target.value)}
+                style={{ fontFamily: 'var(--sans)', fontSize: t ? 18 : 15, color: 'var(--ink-700)', background: 'transparent', border: 'none', outline: 'none', cursor: 'pointer' }}
+              />
+            </div>
+          )}
+          {reminderEnabled && (
+            <Row t={t}
+              icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: '🔥' }}
+              title="Streak nudge"
+              checked={streakNudge}
+              onToggle={handleStreakNudgeToggle}
+              last
+            />
+          )}
         </Card>
 
         <Card header="Privacy" t={t}>
