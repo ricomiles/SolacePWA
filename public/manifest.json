@@ -1,0 +1,22 @@
+{
+  "name": "Solace Journal",
+  "short_name": "Solace",
+  "description": "A quiet place for your thinking",
+  "theme_color": "#3A332B",
+  "background_color": "#FAF5EC",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

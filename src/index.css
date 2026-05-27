@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400&family=Mulish:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Sand & clay palette */
+  --bg-cream: #F4ECE0;
+  --bg-paper: #FAF5EC;
+  --bg-warm: #EDE2D2;
+  --bg-deep: #E5D7C2;
+
+  --terra-50: #F7E8DC;
+  --terra-100: #EDD3BD;
+  --terra-200: #D4A88C;   /* primary accent */
+  --terra-300: #B8896C;
+  --terra-400: #8B7355;   /* deep clay */
+
+  --sage-100: #DCDDC7;
+  --sage-200: #B8BBA0;
+
+  --ink-900: #3A332B;     /* primary text */
+  --ink-700: #5C5247;
+  --ink-500: #7C7062;
+  --ink-300: #A89A88;
+  --ink-200: #C9BCA8;
+
+  --hairline: rgba(58, 51, 43, 0.08);
+  --hairline-strong: rgba(58, 51, 43, 0.14);
+
+  --serif: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Mulish', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-cream);
+  font-family: var(--sans);
+  color: var(--ink-900);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-warm);
+}
+
+/* App shell: mobile-first column centered on desktop */
+.app-shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-paper);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollable page content */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Input resets */
+input,
+textarea,
+button {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+textarea {
+  resize: none;
+}
+
+/* Typography helpers */
+.font-serif {
+  font-family: var(--serif);
+}
+
+.font-sans {
+  font-family: var(--sans);
+}
+
+/* Truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="42" fill="#FAF5EC"/>
+  <!-- horizon mark: clipped half-disc sun on a line -->
+  <clipPath id="sun-clip">
+    <rect x="0" y="0" width="192" height="116"/>
+  </clipPath>
+  <g clip-path="url(#sun-clip)">
+    <circle cx="96" cy="116" r="50" fill="#D4A88C"/>
+  </g>
+  <line x1="22" y1="116" x2="170" y2="116" stroke="#3A332B" stroke-width="6" stroke-linecap="round"/>
+</svg>

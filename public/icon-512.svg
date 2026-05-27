@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#FAF5EC"/>
+  <clipPath id="sun-clip-512">
+    <rect x="0" y="0" width="512" height="308"/>
+  </clipPath>
+  <g clip-path="url(#sun-clip-512)">
+    <circle cx="256" cy="308" r="134" fill="#D4A88C"/>
+  </g>
+  <line x1="58" y1="308" x2="454" y2="308" stroke="#3A332B" stroke-width="16" stroke-linecap="round"/>
+</svg>
