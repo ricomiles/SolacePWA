@@ -4,6 +4,7 @@ import { useEntries } from '../hooks/useEntries'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
+import { getDailyPrompt } from '../data/prompts'
 
 const AUTO_SAVE_INTERVAL = 2000
 
@@ -69,6 +70,54 @@ function useEntryWriter() {
     : saving ? 'saving…' : 'unsaved'
 
   return { title, setTitle, body, setBody, mood, setMood, saving, savedAt, savedLabel, wordCount, doSave, entryId, autoSaveTimer }
+}
+
+// ── Daily prompt banner ───────────────────────────────────────────────────────
+function PromptBanner({ compact = false }) {
+  const [dismissed, setDismissed] = useState(false)
+  const prompt = getDailyPrompt()
+  const hour = new Date().getHours()
+  const timeLabel = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Tonight'
+
+  if (dismissed) return null
+
+  return (
+    <div style={{
+      padding: compact ? '20px 22px' : '24px 22px',
+      background: 'var(--bg-paper)', borderRadius: 20,
+      border: '1px solid var(--hairline)',
+      marginBottom: compact ? 20 : 24,
+      position: 'relative',
+    }}>
+      <div style={{
+        fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700,
+        marginBottom: 12,
+      }}>
+        {timeLabel}'s prompt
+      </div>
+      <div style={{
+        fontFamily: 'var(--serif)', fontWeight: 400,
+        fontSize: compact ? 18 : 22, lineHeight: 1.3,
+        letterSpacing: '-0.015em', color: 'var(--ink-900)',
+      }}>
+        {prompt}
+      </div>
+      <button
+        onClick={e => { e.stopPropagation(); setDismissed(true) }}
+        style={{
+          position: 'absolute', top: 14, right: 14,
+          background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+          color: 'var(--ink-300)', lineHeight: 1,
+        }}
+        aria-label="Dismiss prompt"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
+  )
 }
 
 // ── Desktop / iPad landscape writing pane ─────────────────────────────────────
@@ -153,6 +202,8 @@ function DesktopWritingPane() {
           <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 700, marginBottom: 14 }}>
             {wd} · {day} {month} {year}
           </div>
+
+          {!focusMode && <PromptBanner compact />}
 
           <input
             type="text"
@@ -290,6 +341,8 @@ function MobileWritingView() {
         <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
         </div>
+
+        <PromptBanner />
 
         <input
           type="text"

@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import { useEntries } from '../hooks/useEntries'
 import { useSync } from '../hooks/useSync'
 import { useAuth } from '../hooks/useAuth'
@@ -10,6 +9,8 @@ import TabBar from '../components/TabBar'
 import EntryCard from '../components/EntryCard'
 import OfflineBanner from '../components/OfflineBanner'
 import IOSInstallBanner from '../components/IOSInstallBanner'
+import { SolaceLogoInline } from '../components/SolaceLogo'
+import { getDailyPrompt } from '../data/prompts'
 
 const MOOD_COLORS = {
   calm: '#9CA888',
@@ -20,7 +21,60 @@ const MOOD_COLORS = {
   heavy: '#8B7E6E',
 }
 
-const FILTERS = ['Days', 'Weeks', 'Months']
+// ── Daily prompt card ─────────────────────────────────────────────────────────
+function PromptCard({ onWrite, onSkip, size = 'mobile' }) {
+  const prompt = getDailyPrompt()
+  const t = size === 'tablet'
+  const d = size === 'desktop'
+
+  return (
+    <div style={{
+      background: 'var(--terra-50)', borderRadius: t ? 18 : d ? 18 : 18,
+      padding: t ? '26px 28px' : d ? '26px 28px' : '20px 22px',
+      position: 'relative',
+    }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        marginBottom: t ? 12 : 10,
+      }}>
+        <div style={{
+          fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em',
+          textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700,
+        }}>
+          Today's prompt
+        </div>
+      </div>
+      <div style={{
+        fontFamily: 'var(--serif)', fontWeight: 400,
+        fontSize: t ? 28 : d ? 22 : 22, lineHeight: 1.25,
+        color: 'var(--ink-900)', margin: t ? '0 0 22px' : '0 0 16px',
+      }}>
+        {prompt}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button
+          onClick={onWrite}
+          style={{
+            padding: t ? '10px 18px' : '9px 16px', borderRadius: 999,
+            background: 'var(--terra-300)', color: 'var(--bg-paper)',
+            fontFamily: 'var(--sans)', fontSize: t ? 13 : 13, fontWeight: 600,
+            border: 'none', cursor: 'pointer',
+          }}
+        >Begin writing</button>
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            style={{
+              background: 'transparent', border: 'none', padding: '9px 12px',
+              fontFamily: 'var(--sans)', fontSize: t ? 13 : 13, fontWeight: 500,
+              color: 'var(--ink-700)', cursor: 'pointer',
+            }}
+          >Skip</button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ── Desktop / iPad landscape right-pane placeholder ──────────────────────────
 function DesktopHomePlaceholder() {
@@ -53,6 +107,9 @@ function DesktopHomePlaceholder() {
             ? 'A quiet place for your thinking.\nFive minutes. One page. Just you.'
             : 'Choose from the list on the left, or start something new.'}
         </p>
+        <div style={{ marginBottom: 28 }}>
+          <PromptCard size="desktop" onWrite={() => navigate('/new')} />
+        </div>
         <button
           onClick={() => navigate('/new')}
           style={{
@@ -108,41 +165,19 @@ function TabletPortraitHome() {
         )}
       </div>
 
-      {/* Two-up cards */}
+      {/* Two-up: prompt + write now */}
       <div style={{
-        padding: '28px 56px 0',
-        display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 14,
+        padding: '36px 56px 0',
+        display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16,
       }}>
-        {/* Write now card */}
-        <div
-          onClick={() => navigate('/new')}
-          style={{
-            padding: '24px 26px', borderRadius: 18, background: 'var(--terra-50)',
-            cursor: 'pointer', position: 'relative',
-          }}
-        >
-          <div style={{
-            fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700,
-          }}>Today</div>
-          <div style={{
-            fontFamily: 'var(--serif)', fontSize: 'clamp(22px, 3.2vw, 38px)', lineHeight: 1.25, fontWeight: 400,
-            color: 'var(--ink-900)', margin: '10px 0 20px',
-          }}>
-            What would you like to write about?
-          </div>
-          <span style={{
-            padding: '9px 16px', borderRadius: 999, background: 'var(--terra-300)',
-            color: 'var(--bg-paper)', fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600,
-            display: 'inline-block',
-          }}>Begin writing</span>
-        </div>
+        {/* Prompt card */}
+        <PromptCard size="tablet" onWrite={() => navigate('/new')} />
 
         {/* Dark CTA card */}
         <div
           onClick={() => navigate('/new')}
           style={{
-            padding: '24px 26px', borderRadius: 18, background: 'var(--ink-900)',
+            padding: '26px 28px', borderRadius: 18, background: 'var(--ink-900)',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
           }}
         >
@@ -153,16 +188,16 @@ function TabletPortraitHome() {
           <div style={{
             fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 34px)',
             lineHeight: 1.2, fontWeight: 400, color: 'var(--bg-paper)',
-            margin: '10px 0 20px', flex: 1,
+            margin: '12px 0 24px', flex: 1,
           }}>
             A blank page,<br />waiting.
           </div>
           <div style={{
-            width: 38, height: 38, borderRadius: 19, background: 'rgba(250,245,236,0.14)',
+            width: 40, height: 40, borderRadius: 20, background: 'rgba(250,245,236,0.18)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 14L12 4M12 4H6M12 4v6" stroke="var(--bg-paper)" strokeWidth="1.5" strokeLinecap="round" />
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 14L13 4M13 4H7M13 4v6" stroke="var(--bg-paper)" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
           </div>
         </div>
@@ -233,75 +268,78 @@ function TabletPortraitHome() {
   )
 }
 
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7))
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1))
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7)
+}
+
 // ── Mobile home (< 768px) ─────────────────────────────────────────────────────
 function MobileHome() {
   const navigate = useNavigate()
   const { entries, loading } = useEntries()
   const { syncing, pendingCount } = useSync()
-  const [activeFilter, setActiveFilter] = useState(0)
+  const { user } = useAuth()
 
   const now = new Date()
+  const hour = now.getHours()
+  const greeting = hour < 12 ? 'quietly.' : hour < 17 ? 'gently.' : 'softly.'
   const monthName = now.toLocaleString('en', { month: 'long' })
+  const weekNum = getWeekNumber(now)
+  const avatarLetter = (user?.email?.[0] || 'y').toUpperCase()
 
   return (
-    <div style={{ flex: 1, background: 'var(--bg-warm)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column' }}>
       <StatusBar />
       <OfflineBanner />
 
       {/* Header */}
-      <div style={{
-        padding: '42px 28px 18px', display: 'flex',
-        justifyContent: 'space-between', alignItems: 'flex-end', flexShrink: 0,
-      }}>
-        <div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 13, fontStyle: 'italic', color: 'var(--ink-500)' }}>
-            — the daybook —
-          </div>
-          <h1 style={{
-            fontFamily: 'var(--serif)', fontSize: 38, fontWeight: 400,
-            letterSpacing: -0.6, margin: '6px 0 0', lineHeight: 1, color: 'var(--ink-900)',
-          }}>
-            {monthName}<span style={{ color: 'var(--terra-300)' }}>.</span>
-          </h1>
-        </div>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 13, fontStyle: 'italic', color: 'var(--ink-500)', textAlign: 'right' }}>
-          {syncing ? 'syncing…' : pendingCount > 0 ? `${pendingCount} pending` : ''}
-        </div>
-      </div>
-
-      {/* Filter pills */}
-      <div style={{ padding: '0 28px 8px', display: 'flex', gap: 6, flexShrink: 0 }}>
-        {FILTERS.map((filter, i) => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(i)}
+      <div style={{ padding: '42px 28px 0', flexShrink: 0 }}>
+        {/* Logo row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+          <SolaceLogoInline size={18} sun="var(--terra-200)" line="var(--ink-900)" wordColor="var(--ink-900)" />
+          <div
+            onClick={() => navigate('/settings')}
             style={{
-              padding: '6px 14px', borderRadius: 999, fontFamily: 'var(--sans)',
-              fontSize: 12, fontWeight: 600,
-              background: activeFilter === i ? 'var(--ink-900)' : 'transparent',
-              color: activeFilter === i ? 'var(--bg-paper)' : 'var(--ink-500)',
-              border: activeFilter === i ? 'none' : '1px solid var(--hairline-strong)',
-              cursor: 'pointer', transition: 'all 0.15s',
+              width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600,
+              color: 'var(--terra-400)', cursor: 'pointer',
             }}
-          >{filter}</button>
-        ))}
+          >{avatarLetter}</div>
+        </div>
+
+        {/* Date label */}
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 12, letterSpacing: 2.4, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 600 }}>
+          {monthName} · Week {weekNum}
+        </div>
+
+        {/* Greeting */}
+        <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 44, lineHeight: 1.05, letterSpacing: -1, margin: '14px 0 8px', color: 'var(--ink-900)' }}>
+          Today,{' '}
+          <em style={{ fontStyle: 'italic', color: 'var(--terra-300)' }}>{greeting}</em>
+        </h1>
+
+        {/* Streak / count */}
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 16, color: 'var(--ink-700)', fontStyle: 'italic', lineHeight: 1.5, minHeight: 24 }}>
+          {syncing ? 'syncing…' : pendingCount > 0 ? `${pendingCount} pending` : entries.length > 0 ? `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} so far.` : ''}
+        </div>
       </div>
 
-      {/* Timeline */}
-      <div className="page-scroll" style={{ flex: 1, padding: '20px 28px 100px', position: 'relative' }}>
-        {entries.length > 0 && (
-          <div style={{
-            position: 'absolute', left: 64, top: 28, bottom: 40, width: 1,
-            background: 'var(--hairline-strong)', pointerEvents: 'none',
-          }} />
-        )}
+      {/* Scrollable content */}
+      <div className="page-scroll" style={{ flex: 1, paddingBottom: 100 }}>
+        {/* Prompt card */}
+        <div style={{ margin: '28px 20px 0' }}>
+          <PromptCard size="mobile" onWrite={() => navigate('/new')} />
+        </div>
 
         {loading ? (
-          <div style={{ padding: '60px 0', textAlign: 'center', fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-500)', fontSize: 16 }}>
+          <div style={{ padding: '60px 28px', textAlign: 'center', fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-500)', fontSize: 16 }}>
             Loading your journal…
           </div>
         ) : entries.length === 0 ? (
-          <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <div style={{ padding: '40px 28px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 400, color: 'var(--ink-900)', marginBottom: 12 }}>
               Your journal is empty.
             </div>
@@ -318,16 +356,26 @@ function MobileHome() {
             >Write first entry</button>
           </div>
         ) : (
-          entries.map(entry => <EntryCard key={entry.id} entry={entry} />)
+          <>
+            {/* Section header */}
+            <div style={{ padding: '34px 28px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 500, color: 'var(--ink-900)' }}>Recent entries</div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--terra-400)', fontWeight: 600 }}>All</div>
+            </div>
+            <div style={{ padding: '0 28px' }}>
+              {entries.map((entry, i) => (
+                <EntryCard key={entry.id} entry={entry} variant="list" first={i === 0} />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
       {/* FAB */}
       <button
         onClick={() => navigate('/new')}
-        className="mobile-only"
         style={{
-          position: 'fixed', right: 24, bottom: 100, width: 60, height: 60,
+          position: 'fixed', right: 24, bottom: 36, width: 60, height: 60,
           borderRadius: 30, background: 'var(--ink-900)', color: 'var(--bg-paper)',
           border: 'none', boxShadow: '0 8px 24px rgba(58,51,43,0.28)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -339,7 +387,6 @@ function MobileHome() {
         </svg>
       </button>
 
-      <TabBar />
       <IOSInstallBanner />
       <HomeIndicator />
     </div>
