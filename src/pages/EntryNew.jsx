@@ -294,6 +294,12 @@ function MobileWritingView() {
   const navigate = useNavigate()
   const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
   const { isTabletPortrait: t } = useBreakpoint()
+  const scrollRef = useRef(null)
+
+  // Prevent iOS from scrolling to the textarea on mount — keep title visible
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0
+  }, [])
 
   const now = new Date()
   const dateLabel = now.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
@@ -339,7 +345,7 @@ function MobileWritingView() {
       </div>
 
       {/* Scrollable content */}
-      <div className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 120px' : '36px 32px 120px' }}>
+      <div ref={scrollRef} className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 120px' : '36px 32px 120px' }}>
         <div style={{ maxWidth: t ? 720 : undefined, margin: t ? '0 auto' : undefined }}>
         <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
@@ -379,7 +385,6 @@ function MobileWritingView() {
           value={body}
           onChange={e => setBody(e.target.value)}
           placeholder="Begin writing here…"
-          autoFocus
           style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
         />
         </div>
