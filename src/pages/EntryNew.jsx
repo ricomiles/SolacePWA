@@ -25,8 +25,8 @@ function useEntryWriter() {
   const initialMood = location.state?.mood || null
   const { createEntry } = useEntries()
 
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
+  const [title, setTitle] = useState(location.state?.title || '')
+  const [body, setBody] = useState(location.state?.body || '')
   const [mood, setMood] = useState(initialMood)
   const [savedAt, setSavedAt] = useState(null)
   const [saving, setSaving] = useState(false)
