@@ -25,8 +25,21 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Exclude HTML from precache — always fetch fresh so updates propagate immediately.
+        // JS/CSS assets are content-hashed so CacheFirst is safe for those.
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
+          // Navigation requests use NetworkFirst — ensures new HTML/bundles load on next open
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages-cache',
+              networkTimeoutSeconds: 5,
+            },
+          },
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
@@ -38,18 +51,14 @@ export default defineConfig({
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-stylesheets',
-            },
+            options: { cacheName: 'google-fonts-stylesheets' },
           },
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts-webfonts',
-              expiration: {
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
+              expiration: { maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
         ],

@@ -85,7 +85,7 @@ export default function UnlockScreen() {
           await db.keyCache.delete(user.id)
           navigate('/setup-auth', { replace: true })
         } catch {
-          setMode('phrase-fallback')
+          navigate('/phrase', { replace: true })
         }
         return
       }
