@@ -52,6 +52,20 @@ function useCalendarState() {
   return { today, viewYear, viewMonth, monthName, yearWords, firstDay, daysInMonth, selectedDay, setSelectedDay, goToPrevMonth, goToNextMonth }
 }
 
+function getDayMoodData(dayEntries) {
+  if (!dayEntries.length) return { dominantMood: null, uniqueMoods: [] }
+  const counts = {}
+  for (const entry of dayEntries) {
+    if (entry.mood) counts[entry.mood] = (counts[entry.mood] || 0) + 1
+  }
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
+  if (!sorted.length) return { dominantMood: null, uniqueMoods: [] }
+  return {
+    dominantMood: sorted[0][0],
+    uniqueMoods: sorted.slice(0, 3).map(([m]) => m),
+  }
+}
+
 function buildEntriesByDay(entries, viewYear, viewMonth) {
   const map = {}
   for (const entry of entries) {
@@ -139,9 +153,8 @@ function DesktopCalendarPane() {
             if (!isValid) return <div key={i} />
 
             const dayEntries = entriesByDay[day] || []
-            const mood = dayEntries[0]?.mood || null
-            const moodColor = mood ? MOOD_COLORS[mood] : null
-            const moodBg = mood ? MOOD_BG[mood] : 'var(--bg-paper)'
+            const { dominantMood, uniqueMoods } = getDayMoodData(dayEntries)
+            const moodBg = dominantMood ? MOOD_BG[dominantMood] : 'var(--bg-paper)'
             const isToday = isValid && day === today.getDate() && viewYear === today.getFullYear() && viewMonth === today.getMonth()
             const isSelected = isValid && day === selectedDay
 
@@ -159,13 +172,19 @@ function DesktopCalendarPane() {
                   cursor: 'pointer', transition: 'border-color 0.1s',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <span style={{ fontFamily: 'var(--serif)', fontSize: 18, fontWeight: 500, color: 'var(--ink-900)', lineHeight: 1 }}>{day}</span>
-                  {moodColor && <span style={{ width: 6, height: 6, borderRadius: 3, background: moodColor }} />}
+                  {uniqueMoods.length > 0 && (
+                    <div style={{ display: 'flex', gap: 3, paddingTop: 2 }}>
+                      {uniqueMoods.map(m => (
+                        <span key={m} style={{ width: 6, height: 6, borderRadius: 3, background: MOOD_COLORS[m], flexShrink: 0 }} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {mood && (
+                {dominantMood && (
                   <div style={{ fontFamily: 'var(--sans)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 600, marginTop: 'auto' }}>
-                    {mood}
+                    {dominantMood}
                   </div>
                 )}
               </div>
@@ -280,8 +299,9 @@ function MobileCalendarView() {
           const isToday = isValid && day === today.getDate() && viewYear === today.getFullYear() && viewMonth === today.getMonth()
           const isSelected = isValid && day === selectedDay
           const dayEntries = isValid ? (entriesByDay[day] || []) : []
+          const { dominantMood, uniqueMoods } = getDayMoodData(dayEntries)
           const hasEntry = dayEntries.length > 0
-          const moodDot = dayEntries[0]?.mood ? MOOD_COLORS[dayEntries[0].mood] : null
+          const moodBg = dominantMood ? MOOD_BG[dominantMood] : 'var(--bg-cream)'
 
           return (
             <div
@@ -289,7 +309,7 @@ function MobileCalendarView() {
               onClick={() => isValid && setSelectedDay(day)}
               style={{
                 aspectRatio: '1', borderRadius: 12, position: 'relative',
-                background: isSelected ? 'var(--terra-100)' : isToday ? 'var(--ink-900)' : hasEntry ? 'var(--bg-cream)' : 'transparent',
+                background: isSelected ? 'var(--terra-100)' : isToday ? 'var(--ink-900)' : hasEntry ? moodBg : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--serif)', fontSize: 16, fontWeight: 400,
                 color: isToday ? 'var(--bg-paper)' : !isValid ? 'var(--ink-200)' : 'var(--ink-900)',
@@ -297,11 +317,18 @@ function MobileCalendarView() {
               }}
             >
               {isValid ? day : ''}
-              {hasEntry && !isToday && (
-                <div style={{ position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)', width: 5, height: 5, borderRadius: 3, background: moodDot || 'var(--terra-300)' }} />
+              {hasEntry && !isToday && uniqueMoods.length > 0 && (
+                <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 2 }}>
+                  {uniqueMoods.map(m => (
+                    <span key={m} style={{ width: 4, height: 4, borderRadius: 2, background: MOOD_COLORS[m] }} />
+                  ))}
+                </div>
+              )}
+              {hasEntry && !isToday && uniqueMoods.length === 0 && (
+                <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: 2, background: 'var(--terra-300)' }} />
               )}
               {isToday && (
-                <div style={{ position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)', width: 5, height: 5, borderRadius: 3, background: 'var(--terra-200)' }} />
+                <div style={{ position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: 2, background: 'var(--terra-200)' }} />
               )}
             </div>
           )
