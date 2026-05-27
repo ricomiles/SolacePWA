@@ -4,7 +4,6 @@ import { useEntries } from '../hooks/useEntries'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
-import TabBar from '../components/TabBar'
 import OfflineBanner from '../components/OfflineBanner'
 
 const DOW_LABELS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -358,8 +357,6 @@ function MobileCalendarView() {
         </div>
       )}
 
-      <div style={{ flex: 1 }} />
-      <TabBar />
       <HomeIndicator />
     </div>
   )
