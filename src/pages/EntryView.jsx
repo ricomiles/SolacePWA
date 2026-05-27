@@ -266,10 +266,8 @@ function MobileReadingView({ id }) {
             onClick={handleDelete}
             style={{ width: t ? 48 : 36, height: t ? 48 : 36, borderRadius: t ? 24 : 18, background: 'var(--bg-cream)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="3" cy="7" r="1" fill="var(--ink-900)" />
-              <circle cx="7" cy="7" r="1" fill="var(--ink-900)" />
-              <circle cx="11" cy="7" r="1" fill="var(--ink-900)" />
+            <svg width="14" height="15" viewBox="0 0 14 15" fill="none">
+              <path d="M1 3.5h12M5 3.5V2.5a1 1 0 011-1h2a1 1 0 011 1v1M2.5 3.5l.75 9a1 1 0 001 .95h5.5a1 1 0 001-.95l.75-9" stroke="var(--ink-900)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>
