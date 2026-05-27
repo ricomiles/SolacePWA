@@ -21,6 +21,10 @@ Handoff.**
 .DS_Store
 Thumbs.db
 
+# Supabase CLI temp files
+supabase/.temp/
+supabase/supabase/
+
 # Logs
 *.log
 npm-debug.log*
