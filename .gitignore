@@ -10,9 +10,10 @@ dist/
 .env.*.local
 
 # Design handoffs — source-of-truth is the design tool, not the repo
-design_handoff_journal_app
-design_handoff_solace_logo
-Handoff.md
+design_handoff_journal_app/
+design_handoff_solace_logo/
+design_handoff_solace_desktop_tablet/
+Handoff.**
 
 # Vite / editor
 .vite/

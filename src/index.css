@@ -51,31 +51,24 @@ body {
   background: var(--bg-cream);
   font-family: var(--sans);
   color: var(--ink-900);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
 }
 
 #root {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
   background: var(--bg-paper);
 }
 
-/* App shell — full width, column on mobile, row on tablet+ */
+/* App shell — full-bleed flex container.
+   height: 100% lets child percentage heights resolve correctly. */
 .app-shell {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   min-height: 100dvh;
   background: var(--bg-paper);
   display: flex;
   flex-direction: column;
-}
-
-@media (min-width: 768px) {
-  .app-shell {
-    flex-direction: row;
-    align-items: stretch;
-  }
+  align-items: stretch;
 }
 
 /* ── Sidebar (tablet+) ── */
