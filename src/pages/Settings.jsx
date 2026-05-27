@@ -142,8 +142,7 @@ export default function Settings() {
 
   const handleLockJournal = async () => {
     clearKey()
-    if (user) await db.keyCache.delete(user.id)
-    navigate('/phrase', { replace: true })
+    navigate('/unlock', { replace: true })
   }
 
   const handleExport = () => {

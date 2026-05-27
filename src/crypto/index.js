@@ -75,6 +75,29 @@ export async function deriveKey(mnemonic, saltBase64) {
 }
 
 /**
+ * Same as deriveKey but extractable: true — needed for key-wrapping during auth setup.
+ * Export and clear the raw bytes immediately after use.
+ */
+export async function deriveKeyExtractable(mnemonic, saltBase64) {
+  const enc = new TextEncoder()
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(mnemonic),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey'],
+  )
+  const salt = base64ToUint8Array(saltBase64)
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 600_000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt'],
+  )
+}
+
+/**
  * Encrypt a plaintext string with an AES-GCM CryptoKey.
  * Returns { ciphertext: base64, iv: base64 }
  */

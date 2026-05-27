@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { validateMnemonic } from '../crypto/bip39'
-import { deriveKey, decrypt } from '../crypto'
+import { deriveKey, deriveKeyExtractable, decrypt } from '../crypto'
 import { setKey } from '../store/cryptoStore'
+import { setRawDEK } from '../store/setupStore'
 import { fetchSalt } from '../services/auth'
 import { useAuth } from '../hooks/useAuth'
 import db from '../db'
@@ -14,7 +15,6 @@ export default function PhraseEntry() {
   const location = useLocation()
   const { user } = useAuth()
   const [phrase, setPhrase] = useState('')
-  const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -52,18 +52,20 @@ export default function PhraseEntry() {
         return
       }
 
-      // Derive key
-      const key = await deriveKey(trimmed, salt)
+      // Check if this device already has auth set up (user just locked and re-entered phrase)
+      const existingAuth = await db.localAuth.get(currentUser.id)
+
+      // Derive key — extractable only if we need to set up auth wrapping
+      const needsSetup = !existingAuth
+      const key = needsSetup
+        ? await deriveKeyExtractable(trimmed, salt)
+        : await deriveKey(trimmed, salt)
 
       // Validate key by trying to decrypt an existing entry (if any)
-      const entries = await db.entries
-        .where('user_id')
-        .equals(currentUser.id)
-        .first()
-
-      if (entries?.ciphertext) {
+      const sampleEntry = await db.entries.where('user_id').equals(currentUser.id).first()
+      if (sampleEntry?.ciphertext) {
         try {
-          await decrypt(key, entries.ciphertext, entries.iv)
+          await decrypt(key, sampleEntry.ciphertext, sampleEntry.iv)
         } catch {
           setError('Incorrect recovery phrase. Please check your words and try again.')
           setLoading(false)
@@ -71,15 +73,25 @@ export default function PhraseEntry() {
         }
       }
 
-      // Set key in memory
-      setKey(key)
-
-      // Cache mnemonic if user wants
-      if (remember) {
-        await db.keyCache.put({ user_id: currentUser.id, mnemonic: trimmed })
+      // If device already has auth set up, just unlock and go home
+      if (existingAuth) {
+        setKey(key)
+        navigate('/home', { replace: true })
+        return
       }
 
-      navigate('/home', { replace: true })
+      // New device — stash raw DEK for setup, set non-extractable key in memory
+      const rawDEK = new Uint8Array(await crypto.subtle.exportKey('raw', key))
+      const nonExtractable = await crypto.subtle.importKey(
+        'raw', rawDEK, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+      )
+      setRawDEK(rawDEK)
+      setKey(nonExtractable)
+
+      // Delete any old plaintext mnemonic cache
+      await db.keyCache.delete(currentUser.id)
+
+      navigate('/setup-auth', { replace: true })
     } catch (err) {
       setError(err.message || 'Something went wrong')
     } finally {
@@ -164,50 +176,6 @@ export default function PhraseEntry() {
               }}
             />
           </div>
-
-          {/* Remember checkbox */}
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 12,
-              cursor: 'pointer',
-            }}
-          >
-            <div
-              onClick={() => setRemember((r) => !r)}
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 6,
-                border: remember ? 'none' : '2px solid var(--ink-300)',
-                background: remember ? 'var(--ink-900)' : 'transparent',
-                flexShrink: 0,
-                marginTop: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-            >
-              {remember && (
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path d="M1 4l3 3 5-6" stroke="#FAF5EC" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
-            <span
-              style={{
-                fontFamily: 'var(--sans)',
-                fontSize: 13,
-                color: 'var(--ink-700)',
-                lineHeight: 1.5,
-              }}
-            >
-              Remember on this device (you can lock your journal in Settings)
-            </span>
-          </label>
 
           {error && (
             <p

@@ -9,6 +9,8 @@ import Login from './pages/Login'
 import MnemonicDisplay from './pages/MnemonicDisplay'
 import MnemonicVerify from './pages/MnemonicVerify'
 import PhraseEntry from './pages/PhraseEntry'
+import BiometricSetup from './pages/BiometricSetup'
+import UnlockScreen from './pages/UnlockScreen'
 import Home from './pages/Home'
 import EntryNew from './pages/EntryNew'
 import EntryEdit from './pages/EntryEdit'
@@ -21,7 +23,7 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
-  if (!hasKey()) return <Navigate to="/phrase" replace />
+  if (!hasKey()) return <Navigate to="/unlock" replace />
   return children
 }
 
@@ -42,6 +44,8 @@ function AppRoutes() {
         <Route path="/mnemonic" element={<AuthedRoute><MnemonicDisplay /></AuthedRoute>} />
         <Route path="/verify" element={<AuthedRoute><MnemonicVerify /></AuthedRoute>} />
         <Route path="/phrase" element={<AuthedRoute><PhraseEntry /></AuthedRoute>} />
+        <Route path="/unlock" element={<AuthedRoute><UnlockScreen /></AuthedRoute>} />
+        <Route path="/setup-auth" element={<AuthedRoute><BiometricSetup /></AuthedRoute>} />
         <Route path="/home" element={<ProtectedRoute><AppLayout><Home /></AppLayout></ProtectedRoute>} />
         <Route path="/new" element={<ProtectedRoute><AppLayout><EntryNew /></AppLayout></ProtectedRoute>} />
         <Route path="/edit/:id" element={<ProtectedRoute><AppLayout><EntryEdit /></AppLayout></ProtectedRoute>} />
