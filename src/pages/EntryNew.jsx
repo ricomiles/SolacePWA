@@ -74,12 +74,13 @@ function useEntryWriter() {
 
 // ── Daily prompt banner ───────────────────────────────────────────────────────
 function PromptBanner({ compact = false }) {
+  const location = useLocation()
   const [dismissed, setDismissed] = useState(false)
   const prompt = getDailyPrompt()
   const hour = new Date().getHours()
   const timeLabel = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Tonight'
 
-  if (dismissed) return null
+  if (!location.state?.showPrompt || dismissed) return null
 
   return (
     <div style={{

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useEntries } from '../hooks/useEntries'
 import { useSync } from '../hooks/useSync'
 import { useAuth } from '../hooks/useAuth'
@@ -108,7 +109,7 @@ function DesktopHomePlaceholder() {
             : 'Choose from the list on the left, or start something new.'}
         </p>
         <div style={{ marginBottom: 28 }}>
-          <PromptCard size="desktop" onWrite={() => navigate('/new')} />
+          <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true } })} />
         </div>
         <button
           onClick={() => navigate('/new')}
@@ -171,7 +172,7 @@ function TabletPortraitHome() {
         display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16,
       }}>
         {/* Prompt card */}
-        <PromptCard size="tablet" onWrite={() => navigate('/new')} />
+        <PromptCard size="tablet" onWrite={() => navigate('/new', { state: { showPrompt: true } })} />
 
         {/* Dark CTA card */}
         <div
@@ -281,6 +282,7 @@ function MobileHome() {
   const { entries, loading } = useEntries()
   const { syncing, pendingCount } = useSync()
   const { user } = useAuth()
+  const [promptSkipped, setPromptSkipped] = useState(false)
 
   const now = new Date()
   const hour = now.getHours()
@@ -299,15 +301,34 @@ function MobileHome() {
         {/* Logo row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <SolaceLogoInline size={18} sun="var(--terra-200)" line="var(--ink-900)" wordColor="var(--ink-900)" />
-          <div
-            onClick={() => navigate('/settings')}
-            style={{
-              width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600,
-              color: 'var(--terra-400)', cursor: 'pointer',
-            }}
-          >{avatarLetter}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              onClick={() => navigate('/calendar')}
+              style={{
+                width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',
+                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="1.5" y="2.5" width="13" height="12" rx="2" stroke="var(--terra-400)" strokeWidth="1.4"/>
+                <path d="M1.5 6h13" stroke="var(--terra-400)" strokeWidth="1.4"/>
+                <path d="M5 1v3M11 1v3" stroke="var(--terra-400)" strokeWidth="1.4" strokeLinecap="round"/>
+                <rect x="4" y="9" width="2" height="2" rx="0.5" fill="var(--terra-400)"/>
+                <rect x="7" y="9" width="2" height="2" rx="0.5" fill="var(--terra-400)"/>
+                <rect x="10" y="9" width="2" height="2" rx="0.5" fill="var(--terra-400)"/>
+              </svg>
+            </button>
+            <div
+              onClick={() => navigate('/settings')}
+              style={{
+                width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600,
+                color: 'var(--terra-400)', cursor: 'pointer',
+              }}
+            >{avatarLetter}</div>
+          </div>
         </div>
 
         {/* Date label */}
@@ -330,9 +351,15 @@ function MobileHome() {
       {/* Scrollable content */}
       <div className="page-scroll" style={{ flex: 1, paddingBottom: 100 }}>
         {/* Prompt card */}
-        <div style={{ margin: '28px 20px 0' }}>
-          <PromptCard size="mobile" onWrite={() => navigate('/new')} />
-        </div>
+        {!promptSkipped && (
+          <div style={{ margin: '28px 20px 0' }}>
+            <PromptCard
+              size="mobile"
+              onWrite={() => navigate('/new', { state: { showPrompt: true } })}
+              onSkip={() => setPromptSkipped(true)}
+            />
+          </div>
+        )}
 
         {loading ? (
           <div style={{ padding: '60px 28px', textAlign: 'center', fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-500)', fontSize: 16 }}>
