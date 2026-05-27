@@ -120,10 +120,17 @@ export default function Settings() {
   const [promptEnabled, setPromptEnabled] = useState(
     () => localStorage.getItem('solace_daily_prompt') !== 'false'
   )
-
   const handlePromptToggle = (val) => {
     setPromptEnabled(val)
     localStorage.setItem('solace_daily_prompt', val ? 'true' : 'false')
+  }
+
+  const [moodEnabled, setMoodEnabled] = useState(
+    () => localStorage.getItem('solace_mood_tracking') !== 'false'
+  )
+  const handleMoodToggle = (val) => {
+    setMoodEnabled(val)
+    localStorage.setItem('solace_mood_tracking', val ? 'true' : 'false')
   }
 
   const [reminderEnabled, setReminderEnabled] = useState(false)
@@ -254,7 +261,8 @@ export default function Settings() {
 
         <Card header="Practice" t={t}>
           <Row t={t} icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: 'p' }} title="Daily prompt" checked={promptEnabled} onToggle={handlePromptToggle} />
-          <Row t={t} icon={{ bg: 'var(--bg-warm)', fg: 'var(--ink-700)', glyph: 'm' }} title="Mood tracking" detail="On" last />
+          <Row t={t} icon={{ bg: 'var(--bg-warm)', fg: 'var(--ink-700)', glyph: 'm' }} title="Mood tracking" checked={moodEnabled} onToggle={handleMoodToggle} last={!moodEnabled} />
+          {moodEnabled && <Row t={t} icon={{ bg: 'var(--bg-warm)', fg: 'var(--ink-700)', glyph: '↗' }} title="Mood insights" onClick={() => navigate('/mood-insights')} last />}
         </Card>
 
         <Card header="Reminders" t={t}>

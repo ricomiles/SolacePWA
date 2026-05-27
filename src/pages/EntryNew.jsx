@@ -221,8 +221,8 @@ function DesktopWritingPane() {
             }}
           />
 
-          {/* Mood pill */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
+          {/* Mood pill — hidden when mood tracking is disabled */}
+          {localStorage.getItem('solace_mood_tracking') !== 'false' && <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
             <button
               onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
               style={{
@@ -240,7 +240,7 @@ function DesktopWritingPane() {
                 </>
               ) : '+ mood'}
             </button>
-          </div>
+          </div>}
 
           <textarea
             value={body}
@@ -361,7 +361,7 @@ function MobileWritingView() {
           style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: t ? 50 : 30, lineHeight: 1.1, letterSpacing: -0.5, color: 'var(--ink-900)', padding: 0, outline: 'none', marginBottom: t ? 22 : 14 }}
         />
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
+        {localStorage.getItem('solace_mood_tracking') !== 'false' && <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
           <button
             onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
             style={{
@@ -379,7 +379,7 @@ function MobileWritingView() {
               </>
             ) : '+ mood'}
           </button>
-        </div>
+        </div>}
 
         <textarea
           value={body}

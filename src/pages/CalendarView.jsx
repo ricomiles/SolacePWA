@@ -52,6 +52,8 @@ function useCalendarState() {
   return { today, viewYear, viewMonth, monthName, yearWords, firstDay, daysInMonth, selectedDay, setSelectedDay, goToPrevMonth, goToNextMonth }
 }
 
+const moodTrackingOn = () => localStorage.getItem('solace_mood_tracking') !== 'false'
+
 function getDayMoodData(dayEntries) {
   if (!dayEntries.length) return { dominantMood: null, uniqueMoods: [] }
   const counts = {}
@@ -153,7 +155,7 @@ function DesktopCalendarPane() {
             if (!isValid) return <div key={i} />
 
             const dayEntries = entriesByDay[day] || []
-            const { dominantMood, uniqueMoods } = getDayMoodData(dayEntries)
+            const { dominantMood, uniqueMoods } = moodTrackingOn() ? getDayMoodData(dayEntries) : { dominantMood: null, uniqueMoods: [] }
             const moodBg = dominantMood ? MOOD_BG[dominantMood] : 'var(--bg-paper)'
             const isToday = isValid && day === today.getDate() && viewYear === today.getFullYear() && viewMonth === today.getMonth()
             const isSelected = isValid && day === selectedDay
@@ -299,7 +301,7 @@ function MobileCalendarView() {
           const isToday = isValid && day === today.getDate() && viewYear === today.getFullYear() && viewMonth === today.getMonth()
           const isSelected = isValid && day === selectedDay
           const dayEntries = isValid ? (entriesByDay[day] || []) : []
-          const { dominantMood, uniqueMoods } = getDayMoodData(dayEntries)
+          const { dominantMood, uniqueMoods } = moodTrackingOn() ? getDayMoodData(dayEntries) : { dominantMood: null, uniqueMoods: [] }
           const hasEntry = dayEntries.length > 0
           const moodBg = dominantMood ? MOOD_BG[dominantMood] : 'var(--bg-cream)'
 
