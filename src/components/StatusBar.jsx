@@ -1,6 +1,7 @@
 export default function StatusBar({ tint = 'var(--ink-900)' }) {
   return (
     <div
+      className="mobile-only"
       style={{
         display: 'flex',
         justifyContent: 'space-between',

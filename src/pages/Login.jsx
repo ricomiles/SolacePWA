@@ -100,7 +100,7 @@ export default function Login() {
             margin: '0 0 40px',
           }}
         >
-          Sign in to your journal.
+          Sign in to Solace.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>

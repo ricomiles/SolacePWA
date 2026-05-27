@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-const db = new Dexie('SolaceJournal')
+const db = new Dexie('Solace')
 
 db.version(1).stores({
   // entries: indexed fields (not all fields — just ones we query/sort by)

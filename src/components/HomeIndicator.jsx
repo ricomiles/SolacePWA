@@ -1,6 +1,7 @@
 export default function HomeIndicator({ tint = 'var(--ink-900)' }) {
   return (
     <div
+      className="mobile-only"
       style={{
         position: 'absolute',
         bottom: 8,

@@ -3,12 +3,15 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  define: {
+    global: 'globalThis',
+  },
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Solace Journal',
+        name: 'Solace',
         short_name: 'Solace',
         description: 'A quiet place for your thinking',
         theme_color: '#3A332B',

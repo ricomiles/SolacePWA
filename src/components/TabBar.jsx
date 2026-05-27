@@ -14,6 +14,7 @@ export default function TabBar() {
 
   return (
     <div
+      className="mobile-only"
       style={{
         flexShrink: 0,
         padding: '8px 16px 24px',

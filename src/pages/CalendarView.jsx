@@ -93,7 +93,7 @@ export default function CalendarView() {
           </svg>
         </button>
         <div style={{ fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 500, fontStyle: 'italic', color: 'var(--ink-900)' }}>
-          journal
+          Solace
         </div>
         <div style={{ width: 36 }} />
       </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { hasKey } from './store/cryptoStore'
+import AppLayout from './components/AppLayout'
 
 import Welcome from './pages/Welcome'
 import SignUp from './pages/SignUp'
@@ -41,13 +42,13 @@ function AppRoutes() {
         <Route path="/mnemonic" element={<AuthedRoute><MnemonicDisplay /></AuthedRoute>} />
         <Route path="/verify" element={<AuthedRoute><MnemonicVerify /></AuthedRoute>} />
         <Route path="/phrase" element={<AuthedRoute><PhraseEntry /></AuthedRoute>} />
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/new" element={<ProtectedRoute><EntryNew /></ProtectedRoute>} />
-        <Route path="/edit/:id" element={<ProtectedRoute><EntryEdit /></ProtectedRoute>} />
-        <Route path="/entry/:id" element={<ProtectedRoute><EntryView /></ProtectedRoute>} />
-        <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/mood" element={<ProtectedRoute><MoodCheckIn /></ProtectedRoute>} />
+        <Route path="/home" element={<ProtectedRoute><AppLayout><Home /></AppLayout></ProtectedRoute>} />
+        <Route path="/new" element={<ProtectedRoute><AppLayout><EntryNew /></AppLayout></ProtectedRoute>} />
+        <Route path="/edit/:id" element={<ProtectedRoute><AppLayout><EntryEdit /></AppLayout></ProtectedRoute>} />
+        <Route path="/entry/:id" element={<ProtectedRoute><AppLayout><EntryView /></AppLayout></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute><AppLayout><CalendarView /></AppLayout></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+        <Route path="/mood" element={<ProtectedRoute><AppLayout><MoodCheckIn /></AppLayout></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
