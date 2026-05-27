@@ -13,7 +13,7 @@ function useRedirectIfLoggedIn() {
   const { user, loading } = useAuth()
   useEffect(() => {
     if (!loading && user) {
-      navigate(hasKey() ? '/home' : '/phrase', { replace: true })
+      navigate(hasKey() ? '/home' : '/unlock', { replace: true })
     }
   }, [user, loading, navigate])
   return loading

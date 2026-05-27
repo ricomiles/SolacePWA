@@ -88,8 +88,8 @@ export default function PhraseEntry() {
       setRawDEK(rawDEK)
       setKey(nonExtractable)
 
-      // Delete any old plaintext mnemonic cache
-      await db.keyCache.delete(currentUser.id)
+      // Keep keyCache as fallback — BiometricSetup deletes it after localAuth is confirmed saved
+      await db.keyCache.put({ user_id: currentUser.id, mnemonic: trimmed })
 
       navigate('/setup-auth', { replace: true })
     } catch (err) {
