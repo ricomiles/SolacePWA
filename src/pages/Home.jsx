@@ -81,6 +81,7 @@ function PromptCard({ onWrite, onSkip, size = 'mobile' }) {
 function DesktopHomePlaceholder() {
   const navigate = useNavigate()
   const { entries } = useEntries()
+  const promptEnabled = localStorage.getItem('solace_daily_prompt') !== 'false'
 
   return (
     <div style={{
@@ -108,9 +109,11 @@ function DesktopHomePlaceholder() {
             ? 'A quiet place for your thinking.\nFive minutes. One page. Just you.'
             : 'Choose from the list on the left, or start something new.'}
         </p>
-        <div style={{ marginBottom: 28 }}>
-          <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
-        </div>
+        {promptEnabled && (
+          <div style={{ marginBottom: 28 }}>
+            <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
+          </div>
+        )}
         <button
           onClick={() => navigate('/new')}
           style={{
@@ -135,6 +138,7 @@ function TabletPortraitHome() {
   const navigate = useNavigate()
   const { entries } = useEntries()
   const { user } = useAuth()
+  const promptEnabled = localStorage.getItem('solace_daily_prompt') !== 'false'
 
   const now = new Date()
   const dayName = now.toLocaleString('en', { weekday: 'long' })
@@ -169,10 +173,10 @@ function TabletPortraitHome() {
       {/* Two-up: prompt + write now */}
       <div style={{
         padding: '36px 56px 0',
-        display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16,
+        display: 'grid', gridTemplateColumns: promptEnabled ? '1.2fr 1fr' : '1fr', gap: 16,
       }}>
         {/* Prompt card */}
-        <PromptCard size="tablet" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
+        {promptEnabled && <PromptCard size="tablet" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />}
 
         {/* Dark CTA card */}
         <div
@@ -283,6 +287,7 @@ function MobileHome() {
   const { syncing, pendingCount } = useSync()
   const { user } = useAuth()
   const [promptSkipped, setPromptSkipped] = useState(false)
+  const promptEnabled = localStorage.getItem('solace_daily_prompt') !== 'false'
 
   const now = new Date()
   const hour = now.getHours()
@@ -351,7 +356,7 @@ function MobileHome() {
       {/* Scrollable content */}
       <div className="page-scroll" style={{ flex: 1, paddingBottom: 100 }}>
         {/* Prompt card */}
-        {!promptSkipped && (
+        {promptEnabled && !promptSkipped && (
           <div style={{ margin: '28px 20px 0' }}>
             <PromptCard
               size="mobile"

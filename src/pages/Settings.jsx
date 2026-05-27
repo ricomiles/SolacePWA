@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from '../services/auth'
 import { clearKey } from '../store/cryptoStore'
@@ -7,9 +8,35 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import db from '../db'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
-import TabBar from '../components/TabBar'
 
-function Row({ icon, title, detail, last, danger, onClick, t }) {
+function Toggle({ checked, onChange, size = 'sm' }) {
+  const w = size === 'lg' ? 52 : 40
+  const h = size === 'lg' ? 30 : 24
+  const knob = size === 'lg' ? 24 : 18
+  const travel = w - h  // knob moves this many px
+  return (
+    <div
+      onClick={e => { e.stopPropagation(); onChange(!checked) }}
+      style={{
+        width: w, height: h, borderRadius: h / 2,
+        background: checked ? 'var(--terra-300)' : 'var(--hairline-strong)',
+        position: 'relative', cursor: 'pointer', flexShrink: 0,
+        transition: 'background 0.2s',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: (h - knob) / 2, left: checked ? travel - (h - knob) / 2 + (h - knob) / 2 : (h - knob) / 2,
+        width: knob, height: knob, borderRadius: knob / 2,
+        background: 'var(--bg-paper)',
+        boxShadow: '0 1px 3px rgba(58,51,43,0.18)',
+        transition: 'left 0.2s',
+      }} />
+    </div>
+  )
+}
+
+function Row({ icon, title, detail, last, danger, onClick, checked, onToggle, t }) {
   return (
     <div
       onClick={onClick}
@@ -41,13 +68,15 @@ function Row({ icon, title, detail, last, danger, onClick, t }) {
         color: danger ? '#A04F3A' : 'var(--ink-900)',
         fontWeight: 500,
       }}>{title}</div>
-      {detail && (
+      {onToggle != null ? (
+        <Toggle checked={!!checked} onChange={onToggle} size={t ? 'lg' : 'sm'} />
+      ) : detail ? (
         <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 18 : 13, color: 'var(--ink-500)', marginRight: t ? 10 : 6 }}>
           {detail}
         </div>
-      )}
-      {onClick && (
-        <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+      ) : null}
+      {onClick && !onToggle && (
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" style={{ marginLeft: 4 }}>
           <path d="M1 1l4 4-4 4" stroke="var(--ink-300)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       )}
@@ -86,6 +115,15 @@ export default function Settings() {
   const { entries } = useEntries()
   const bp = useBreakpoint()
   const t = bp.isTabletPortrait
+
+  const [promptEnabled, setPromptEnabled] = useState(
+    () => localStorage.getItem('solace_daily_prompt') !== 'false'
+  )
+
+  const handlePromptToggle = (val) => {
+    setPromptEnabled(val)
+    localStorage.setItem('solace_daily_prompt', val ? 'true' : 'false')
+  }
 
   const initial = user?.email?.[0]?.toUpperCase() || 'J'
   const entryCount = entries.length
@@ -168,7 +206,7 @@ export default function Settings() {
         </div>
 
         <Card header="Practice" t={t}>
-          <Row t={t} icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: 'p' }} title="Daily prompt" detail="Coming soon" />
+          <Row t={t} icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: 'p' }} title="Daily prompt" checked={promptEnabled} onToggle={handlePromptToggle} />
           <Row t={t} icon={{ bg: 'var(--sage-100)', fg: '#5C6F4F', glyph: 'r' }} title="Reminder" detail="Coming soon" />
           <Row t={t} icon={{ bg: 'var(--bg-warm)', fg: 'var(--ink-700)', glyph: 'm' }} title="Mood tracking" detail="On" last />
         </Card>
@@ -193,7 +231,6 @@ export default function Settings() {
         </div>
       </div>
 
-      <TabBar />
       <HomeIndicator />
     </div>
   )
