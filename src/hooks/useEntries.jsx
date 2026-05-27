@@ -49,11 +49,12 @@ export function useEntries() {
             title: parsed.title || '',
             body: parsed.body || '',
             mood: parsed.mood || null,
+            prompt: parsed.prompt || null,
             wordCount: parsed.body ? parsed.body.trim().split(/\s+/).filter(Boolean).length : 0,
           }
         } catch {
           // If decryption fails, return entry without plaintext fields
-          return { ...entry, title: '[encrypted]', body: '', mood: null, wordCount: 0 }
+          return { ...entry, title: '[encrypted]', body: '', mood: null, prompt: null, wordCount: 0 }
         }
       }),
     ).then((results) => {
@@ -71,11 +72,11 @@ export function useEntries() {
     return () => { cancelled = true }
   }, [rawEntries])
 
-  const createEntry = useCallback(async ({ title, body, mood }) => {
+  const createEntry = useCallback(async ({ title, body, mood, prompt }) => {
     const key = getKey()
     if (!key || !user) throw new Error('No key or user')
 
-    const plaintext = JSON.stringify({ title, body, mood })
+    const plaintext = JSON.stringify({ title, body, mood, prompt: prompt || null })
     const { ciphertext, iv } = await encrypt(key, plaintext)
 
     const now = new Date().toISOString()
@@ -101,11 +102,11 @@ export function useEntries() {
     return entry
   }, [user])
 
-  const updateEntry = useCallback(async (id, { title, body, mood }) => {
+  const updateEntry = useCallback(async (id, { title, body, mood, prompt }) => {
     const key = getKey()
     if (!key || !user) throw new Error('No key or user')
 
-    const plaintext = JSON.stringify({ title, body, mood })
+    const plaintext = JSON.stringify({ title, body, mood, prompt: prompt || null })
     const { ciphertext, iv } = await encrypt(key, plaintext)
 
     const now = new Date().toISOString()

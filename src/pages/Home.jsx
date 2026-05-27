@@ -109,7 +109,7 @@ function DesktopHomePlaceholder() {
             : 'Choose from the list on the left, or start something new.'}
         </p>
         <div style={{ marginBottom: 28 }}>
-          <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true } })} />
+          <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
         </div>
         <button
           onClick={() => navigate('/new')}
@@ -172,7 +172,7 @@ function TabletPortraitHome() {
         display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16,
       }}>
         {/* Prompt card */}
-        <PromptCard size="tablet" onWrite={() => navigate('/new', { state: { showPrompt: true } })} />
+        <PromptCard size="tablet" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
 
         {/* Dark CTA card */}
         <div
@@ -355,7 +355,7 @@ function MobileHome() {
           <div style={{ margin: '28px 20px 0' }}>
             <PromptCard
               size="mobile"
-              onWrite={() => navigate('/new', { state: { showPrompt: true } })}
+              onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })}
               onSkip={() => setPromptSkipped(true)}
             />
           </div>

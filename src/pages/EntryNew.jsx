@@ -24,6 +24,7 @@ function getMoodDot(mood) {
 function useEntryWriter() {
   const location = useLocation()
   const initialMood = location.state?.mood || null
+  const initialPrompt = location.state?.promptText || null
   const { createEntry } = useEntries()
 
   const [title, setTitle] = useState(location.state?.title || '')
@@ -33,6 +34,7 @@ function useEntryWriter() {
   const [saving, setSaving] = useState(false)
   const [entryId, setEntryId] = useState(null)
   const [wordCount, setWordCount] = useState(0)
+  const prompt = initialPrompt
 
   const autoSaveTimer = useRef(null)
   const isDirtyRef = useRef(false)
@@ -46,7 +48,7 @@ function useEntryWriter() {
     setSaving(true)
     try {
       if (!entryId) {
-        const entry = await createEntry({ title, body, mood })
+        const entry = await createEntry({ title, body, mood, prompt })
         setEntryId(entry.id)
       }
       setSavedAt(new Date())
@@ -69,7 +71,7 @@ function useEntryWriter() {
     ? `saved · ${Math.round((Date.now() - savedAt.getTime()) / 60000) || '<1'}m ago`
     : saving ? 'saving…' : 'unsaved'
 
-  return { title, setTitle, body, setBody, mood, setMood, saving, savedAt, savedLabel, wordCount, doSave, entryId, autoSaveTimer }
+  return { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedAt, savedLabel, wordCount, doSave, entryId, autoSaveTimer }
 }
 
 // ── Daily prompt banner ───────────────────────────────────────────────────────

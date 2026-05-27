@@ -23,6 +23,7 @@ function useEntryData(id) {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [mood, setMood] = useState(null)
+  const [prompt, setPrompt] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const rawEntry = useLiveQuery(() => db.entries.get(id), [id])
@@ -38,6 +39,7 @@ function useEntryData(id) {
         setTitle(parsed.title || 'Untitled')
         setBody(parsed.body || '')
         setMood(parsed.mood || null)
+        setPrompt(parsed.prompt || null)
         setLoading(false)
       })
       .catch(() => {
@@ -46,13 +48,13 @@ function useEntryData(id) {
       })
   }, [rawEntry])
 
-  return { rawEntry, title, body, mood, loading }
+  return { rawEntry, title, body, mood, prompt, loading }
 }
 
 // ── Desktop / iPad landscape reading pane ─────────────────────────────────────
 function DesktopReadingPane({ id }) {
   const navigate = useNavigate()
-  const { rawEntry, title, body, mood, loading } = useEntryData(id)
+  const { rawEntry, title, body, mood, prompt, loading } = useEntryData(id)
   const { deleteEntry } = useEntries()
 
   if (loading) {
@@ -127,6 +129,21 @@ function DesktopReadingPane({ id }) {
             letterSpacing: '-0.02em', margin: '0 0 32px', color: 'var(--ink-900)',
           }}>{title}</h1>
 
+          {/* Prompt attribution */}
+          {prompt && (
+            <div style={{
+              padding: '16px 20px', borderRadius: 12, border: '1px solid var(--hairline)',
+              background: 'var(--terra-50)', marginBottom: 32,
+            }}>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700, marginBottom: 6 }}>
+                Written to this prompt
+              </div>
+              <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink-700)', lineHeight: 1.5 }}>
+                {prompt}
+              </div>
+            </div>
+          )}
+
           {/* Body paragraphs */}
           {paragraphs.map((para, idx) => {
             if (para.startsWith('>')) {
@@ -189,7 +206,7 @@ function DesktopReadingPane({ id }) {
 // ── Mobile / iPad portrait reading view ───────────────────────────────────────
 function MobileReadingView({ id }) {
   const navigate = useNavigate()
-  const { rawEntry, title, body, mood, loading } = useEntryData(id)
+  const { rawEntry, title, body, mood, prompt, loading } = useEntryData(id)
   const { entries, deleteEntry } = useEntries()
   const { isTabletPortrait: t } = useBreakpoint()
 
@@ -287,6 +304,22 @@ function MobileReadingView({ id }) {
           <div style={{ width: 5, height: 5, borderRadius: 3, background: 'var(--terra-200)' }} />
           <div style={{ flex: 1, height: 1, background: 'var(--hairline-strong)' }} />
         </div>
+
+        {/* Prompt attribution */}
+        {prompt && (
+          <div style={{
+            padding: t ? '16px 20px' : '14px 18px', borderRadius: 12,
+            border: '1px solid var(--hairline)', background: 'var(--terra-50)',
+            marginBottom: t ? 32 : 24,
+          }}>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700, marginBottom: 6 }}>
+              Written to this prompt
+            </div>
+            <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: t ? 17 : 14, color: 'var(--ink-700)', lineHeight: 1.5 }}>
+              {prompt}
+            </div>
+          </div>
+        )}
 
         {paragraphs.map((para, idx) => {
           if (idx === 0 && para.length > 0) {
