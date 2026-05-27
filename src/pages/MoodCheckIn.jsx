@@ -22,11 +22,16 @@ function useMoodNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = location.state?.returnTo || '/new'
-  // Preserve any draft title/body the caller passed in state
-  const draft = { title: location.state?.title, body: location.state?.body }
+  const draft = {
+    title: location.state?.title,
+    body: location.state?.body,
+    showPrompt: location.state?.showPrompt,
+    promptText: location.state?.promptText,
+  }
 
   const go = (mood, note) => {
     navigate(returnTo, {
+      replace: true,
       state: { mood: mood || undefined, moodNote: note || undefined, ...draft },
     })
   }

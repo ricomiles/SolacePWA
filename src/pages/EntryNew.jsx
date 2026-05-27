@@ -127,7 +127,7 @@ function PromptBanner({ compact = false }) {
 function DesktopWritingPane() {
   const navigate = useNavigate()
   const bp = useBreakpoint()
-  const { title, setTitle, body, setBody, mood, setMood, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
   const [focusMode, setFocusMode] = useState(false)
 
   const now = new Date()
@@ -224,7 +224,7 @@ function DesktopWritingPane() {
           {/* Mood pill */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
             <button
-              onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body } })}
+              onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px',
                 background: mood ? 'var(--sage-100)' : 'transparent',
@@ -292,7 +292,7 @@ function DesktopWritingPane() {
 // ── Mobile writing view ────────────────────────────────────────────────────────
 function MobileWritingView() {
   const navigate = useNavigate()
-  const { title, setTitle, body, setBody, mood, setMood, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
   const { isTabletPortrait: t } = useBreakpoint()
 
   const now = new Date()
@@ -303,12 +303,12 @@ function MobileWritingView() {
   const handleDone = async () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     await doSave()
-    navigate(-1)
+    navigate('/home')
   }
 
   const handleClose = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-    doSave().finally(() => navigate(-1))
+    doSave().finally(() => navigate('/home'))
   }
 
   return (
@@ -357,7 +357,7 @@ function MobileWritingView() {
 
         <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
           <button
-            onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body } })}
+            onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: t ? '10px 18px' : '6px 12px',
               background: mood ? 'var(--sage-100)' : 'transparent',
