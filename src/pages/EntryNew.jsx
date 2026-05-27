@@ -239,6 +239,7 @@ function DesktopWritingPane() {
 function MobileWritingView() {
   const navigate = useNavigate()
   const { title, setTitle, body, setBody, mood, setMood, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
+  const { isTabletPortrait: t } = useBreakpoint()
 
   const now = new Date()
   const dateLabel = now.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
@@ -261,10 +262,10 @@ function MobileWritingView() {
       <StatusBar />
 
       {/* Top bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px 0', flexShrink: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: t ? '28px 56px 0' : '20px 24px 0', flexShrink: 0 }}>
         <button
           onClick={handleClose}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M9 2L4 7l5 5" stroke="var(--ink-500)" strokeWidth="1.5" strokeLinecap="round" />
@@ -272,20 +273,21 @@ function MobileWritingView() {
           Close
         </button>
 
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 6, height: 6, borderRadius: 3, background: saving ? 'var(--terra-200)' : 'var(--terra-300)', display: 'inline-block' }} />
           {savedLabel}
         </div>
 
         <button
           onClick={handleDone}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
+          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
         >Done</button>
       </div>
 
       {/* Scrollable content */}
-      <div className="page-scroll" style={{ flex: 1, padding: '36px 32px 120px' }}>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: 14 }}>
+      <div className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 120px' : '36px 32px 120px' }}>
+        <div style={{ maxWidth: t ? 720 : undefined, margin: t ? '0 auto' : undefined }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
         </div>
 
@@ -294,17 +296,17 @@ function MobileWritingView() {
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Give this entry a title…"
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.5, color: 'var(--ink-900)', padding: 0, outline: 'none', marginBottom: 14 }}
+          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: t ? 50 : 30, lineHeight: 1.1, letterSpacing: -0.5, color: 'var(--ink-900)', padding: 0, outline: 'none', marginBottom: t ? 22 : 14 }}
         />
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
           <button
             onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body } })}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+              display: 'flex', alignItems: 'center', gap: 6, padding: t ? '10px 18px' : '6px 12px',
               background: mood ? 'var(--sage-100)' : 'transparent',
               border: mood ? 'none' : '1px dashed var(--hairline-strong)',
-              borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 12,
+              borderRadius: 999, fontFamily: 'var(--sans)', fontSize: t ? 16 : 12,
               color: mood ? 'var(--ink-700)' : 'var(--ink-500)', fontWeight: 600, cursor: 'pointer',
             }}
           >
@@ -322,8 +324,9 @@ function MobileWritingView() {
           onChange={e => setBody(e.target.value)}
           placeholder="Begin writing here…"
           autoFocus
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.65, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
+          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
         />
+        </div>
       </div>
 
       {/* Bottom toolbar */}

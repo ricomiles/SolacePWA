@@ -139,7 +139,7 @@ export default function AppLayout({ children }) {
         width: '100%', overflow: 'hidden', flex: 1, background: 'var(--bg-paper)',
       }}>
         <TabletTopNav />
-        <div style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+        <div style={{ flex: 1, minWidth: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
       </div>

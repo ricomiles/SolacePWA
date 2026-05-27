@@ -93,7 +93,7 @@ function TabletPortraitHome() {
           textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 700,
         }}>{dayName} · {dateLabel}</div>
         <h1 style={{
-          fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 56, lineHeight: 1.08,
+          fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 'clamp(52px, 7.5vw, 84px)', lineHeight: 1.08,
           letterSpacing: '-0.025em', color: 'var(--ink-900)', margin: '12px 0 8px',
         }}>
           Today,{' '}
@@ -126,7 +126,7 @@ function TabletPortraitHome() {
             textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700,
           }}>Today</div>
           <div style={{
-            fontFamily: 'var(--serif)', fontSize: 24, lineHeight: 1.25, fontWeight: 400,
+            fontFamily: 'var(--serif)', fontSize: 'clamp(22px, 3.2vw, 38px)', lineHeight: 1.25, fontWeight: 400,
             color: 'var(--ink-900)', margin: '10px 0 20px',
           }}>
             What would you like to write about?
@@ -151,7 +151,7 @@ function TabletPortraitHome() {
             textTransform: 'uppercase', color: 'rgba(250,245,236,0.6)', fontWeight: 700,
           }}>Write now</div>
           <div style={{
-            fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 22,
+            fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 34px)',
             lineHeight: 1.2, fontWeight: 400, color: 'var(--bg-paper)',
             margin: '10px 0 20px', flex: 1,
           }}>
@@ -203,7 +203,7 @@ function TabletPortraitHome() {
                   }}
                 >
                   <div style={{ width: 52, flexShrink: 0 }}>
-                    <div style={{ fontFamily: 'var(--serif)', fontSize: 28, fontWeight: 400, lineHeight: 1, color: 'var(--ink-900)' }}>{day}</div>
+                    <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 400, lineHeight: 1, color: 'var(--ink-900)' }}>{day}</div>
                     <div style={{ fontFamily: 'var(--sans)', fontSize: 9, letterSpacing: '0.14em', color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 600, marginTop: 4 }}>{month}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -213,7 +213,7 @@ function TabletPortraitHome() {
                         {entry.mood ? `${entry.mood} · ` : ''}{entry.wordCount || 0} words
                       </span>
                     </div>
-                    <div style={{ fontFamily: 'var(--serif)', fontSize: 17, fontWeight: 500, color: 'var(--ink-900)', lineHeight: 1.25, marginBottom: 4 }}>
+                    <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(16px, 2.4vw, 26px)', fontWeight: 500, color: 'var(--ink-900)', lineHeight: 1.25, marginBottom: 4 }}>
                       {entry.title || 'Untitled'}
                     </div>
                     {entry.body && (

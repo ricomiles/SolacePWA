@@ -207,6 +207,7 @@ function DesktopEditPane({ id }) {
 function MobileEditView({ id }) {
   const navigate = useNavigate()
   const { title, setTitle, body, setBody, mood, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
+  const { isTabletPortrait: t } = useBreakpoint()
 
   const now = new Date()
   const dateLabel = now.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
@@ -228,28 +229,29 @@ function MobileEditView({ id }) {
     <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column' }}>
       <StatusBar />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px 0', flexShrink: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: t ? '28px 56px 0' : '20px 24px 0', flexShrink: 0 }}>
         <button
           onClick={handleClose}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M9 2L4 7l5 5" stroke="var(--ink-500)" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           Close
         </button>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 6, height: 6, borderRadius: 3, background: saving ? 'var(--terra-200)' : 'var(--terra-300)', display: 'inline-block' }} />
           {savedLabel}
         </div>
         <button
           onClick={handleDone}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
+          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
         >Done</button>
       </div>
 
-      <div className="page-scroll" style={{ flex: 1, padding: '36px 32px 120px' }}>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: 14 }}>
+      <div className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 120px' : '36px 32px 120px' }}>
+        <div style={{ maxWidth: t ? 720 : undefined, margin: t ? '0 auto' : undefined }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
         </div>
         <input
@@ -257,11 +259,11 @@ function MobileEditView({ id }) {
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Title…"
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 30, lineHeight: 1.15, letterSpacing: -0.5, color: 'var(--ink-900)', padding: 0, outline: 'none', marginBottom: 14 }}
+          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: t ? 50 : 30, lineHeight: 1.1, letterSpacing: -0.5, color: 'var(--ink-900)', padding: 0, outline: 'none', marginBottom: t ? 22 : 14 }}
         />
         {mood && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: 'var(--sage-100)', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-700)', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: t ? '10px 18px' : '6px 12px', background: 'var(--sage-100)', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: t ? 16 : 12, color: 'var(--ink-700)', fontWeight: 600 }}>
               <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood) }} />
               {mood}
             </div>
@@ -272,8 +274,9 @@ function MobileEditView({ id }) {
           onChange={e => setBody(e.target.value)}
           placeholder="Continue writing…"
           autoFocus={loaded}
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.65, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
+          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
         />
+        </div>
       </div>
 
       <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', width: 'min(calc(100% - 32px), 398px)', padding: '10px 14px', background: 'var(--bg-cream)', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(58,51,43,0.06)', zIndex: 30 }}>
