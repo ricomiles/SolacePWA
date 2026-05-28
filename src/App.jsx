@@ -19,6 +19,7 @@ import CalendarView from './pages/CalendarView'
 import Settings from './pages/Settings'
 import MoodCheckIn from './pages/MoodCheckIn'
 import MoodInsights from './pages/MoodInsights'
+import Search from './pages/Search'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
         <Route path="/mood" element={<ProtectedRoute><AppLayout><MoodCheckIn /></AppLayout></ProtectedRoute>} />
         <Route path="/mood-insights" element={<ProtectedRoute><AppLayout><MoodInsights /></AppLayout></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><AppLayout><Search /></AppLayout></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
