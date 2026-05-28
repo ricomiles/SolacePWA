@@ -49,9 +49,17 @@ function MobileSearch() {
       <StatusBar />
 
       {/* Search bar */}
-      <div style={{ padding: t ? '28px 48px 0' : '20px 20px 0', flexShrink: 0 }}>
+      <div style={{ padding: t ? '28px 48px 0' : '20px 20px 0', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M13 4L7 10l6 6" stroke="var(--ink-700)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
+          flex: 1, display: 'flex', alignItems: 'center', gap: 10,
           background: 'var(--terra-50)', borderRadius: 16,
           padding: t ? '14px 20px' : '12px 16px',
         }}>
