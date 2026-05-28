@@ -12,6 +12,7 @@ import OfflineBanner from '../components/OfflineBanner'
 import IOSInstallBanner from '../components/IOSInstallBanner'
 import { SolaceLogoInline } from '../components/SolaceLogo'
 import { getDailyPrompt, getPromptForDate, hasTodayEntry } from '../data/prompts'
+import UpdateBanner from '../components/UpdateBanner'
 
 const MOOD_COLORS = {
   calm: '#9CA888',
@@ -109,13 +110,12 @@ function DesktopHomePlaceholder() {
   const prompt = getDailyPrompt()
 
   const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`
-  // answered = prompt was responded to today (not just any entry written)
-  const answered = localStorage.getItem('solace_prompt_answered') === todayKey
-  // still need an entry to link to in "View today's entry"
+  // todayEntry = today's entry that was written in response to the prompt
   const todayEntry = entries.find(e => {
     const d = new Date(e.client_updated_at || e.created_at)
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayKey
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayKey && e.prompt
   })
+  const answered = !!todayEntry
 
   if (promptEnabled) {
     const recentDays = Array.from({ length: 5 }, (_, i) => {
@@ -403,6 +403,7 @@ function MobileHome() {
   return (
     <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column' }}>
       <StatusBar />
+      <UpdateBanner />
       <OfflineBanner />
 
       {/* Header */}

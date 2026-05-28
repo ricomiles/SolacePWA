@@ -11,6 +11,33 @@ import HomeIndicator from '../components/HomeIndicator'
 
 const AUTO_SAVE_INTERVAL = 2000
 
+function PromptBanner({ prompt }) {
+  const [dismissed, setDismissed] = useState(false)
+  if (!prompt || dismissed) return null
+  return (
+    <div style={{
+      padding: '20px 22px', background: 'var(--bg-paper)', borderRadius: 20,
+      border: '1px solid var(--hairline)', marginBottom: 20, position: 'relative',
+    }}>
+      <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700, marginBottom: 12 }}>
+        Prompt
+      </div>
+      <div style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 18, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--ink-900)' }}>
+        {prompt}
+      </div>
+      <button
+        onClick={() => setDismissed(true)}
+        style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--ink-300)', lineHeight: 1 }}
+        aria-label="Dismiss prompt"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 const MOOD_COLORS = {
   calm: '#9CA888', tender: '#D8A892', restless: '#B89678',
   warm: '#B8896C', hopeful: '#C9B080', heavy: '#8B7E6E',
@@ -25,6 +52,7 @@ function useEditorState(id) {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [mood, setMood] = useState(null)
+  const [prompt, setPrompt] = useState(null)
   const [savedAt, setSavedAt] = useState(null)
   const [saving, setSaving] = useState(false)
   const [wordCount, setWordCount] = useState(0)
@@ -45,6 +73,7 @@ function useEditorState(id) {
         setTitle(parsed.title || '')
         setBody(parsed.body || '')
         setMood(parsed.mood || null)
+        setPrompt(parsed.prompt || null)
         setLoaded(true)
       })
       .catch(() => setLoaded(true))
@@ -58,7 +87,7 @@ function useEditorState(id) {
     if (!isDirtyRef.current || !loaded) return
     setSaving(true)
     try {
-      await updateEntry(id, { title, body, mood })
+      await updateEntry(id, { title, body, mood, prompt })
       setSavedAt(new Date())
       isDirtyRef.current = false
     } catch {
@@ -80,13 +109,13 @@ function useEditorState(id) {
     ? `saved · ${Math.round((Date.now() - savedAt.getTime()) / 60000) || '<1'}m ago`
     : saving ? 'saving…' : 'unsaved'
 
-  return { title, setTitle, body, setBody, mood, setMood, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded }
+  return { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded }
 }
 
 // ── Desktop / iPad landscape editing pane ─────────────────────────────────────
 function DesktopEditPane({ id }) {
   const navigate = useNavigate()
-  const { title, setTitle, body, setBody, mood, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
+  const { title, setTitle, body, setBody, mood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
   const [focusMode, setFocusMode] = useState(false)
 
   const now = new Date()
@@ -160,6 +189,7 @@ function DesktopEditPane({ id }) {
           <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 700, marginBottom: 14 }}>
             {wd} · {day} {month} {year}
           </div>
+          {!focusMode && <PromptBanner prompt={prompt} />}
           <input
             type="text"
             value={title}
@@ -206,7 +236,7 @@ function DesktopEditPane({ id }) {
 // ── Mobile editing view ────────────────────────────────────────────────────────
 function MobileEditView({ id }) {
   const navigate = useNavigate()
-  const { title, setTitle, body, setBody, mood, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
+  const { title, setTitle, body, setBody, mood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
   const { isTabletPortrait: t } = useBreakpoint()
 
   const now = new Date()
@@ -254,6 +284,7 @@ function MobileEditView({ id }) {
         <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
         </div>
+        <PromptBanner prompt={prompt} />
         <input
           type="text"
           value={title}

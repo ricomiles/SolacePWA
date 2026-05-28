@@ -6,6 +6,7 @@ import { SolaceLogoInline } from './SolaceLogo'
 import DesktopSidebar from './DesktopSidebar'
 import TabletRail from './TabletRail'
 import EntriesPanel from './EntriesPanel'
+import UpdateBanner from './UpdateBanner'
 
 // Routes where the entries panel is shown on tablet landscape + desktop
 function wantsEntriesPanel(pathname) {
@@ -95,17 +96,17 @@ export default function AppLayout({ children }) {
   if (bp.isDesktop) {
     const withEntries = wantsEntriesPanel(location.pathname)
     return (
-      <div style={{
-        display: 'flex', height: '100%', width: '100%',
-        overflow: 'hidden', flex: 1,
-      }}>
-        <DesktopSidebar />
-        {withEntries && <EntriesPanel width={360} />}
-        <div style={{
-          flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
-          overflow: 'hidden', background: 'var(--bg-paper)',
-        }}>
-          {children}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden', flex: 1 }}>
+        <UpdateBanner />
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <DesktopSidebar />
+          {withEntries && <EntriesPanel width={360} />}
+          <div style={{
+            flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
+            overflow: 'hidden', background: 'var(--bg-paper)',
+          }}>
+            {children}
+          </div>
         </div>
       </div>
     )
@@ -115,17 +116,17 @@ export default function AppLayout({ children }) {
   if (bp.isTabletLandscape) {
     const withEntries = wantsEntriesPanel(location.pathname)
     return (
-      <div style={{
-        display: 'flex', height: '100%', width: '100%',
-        overflow: 'hidden', flex: 1,
-      }}>
-        <TabletRail />
-        {withEntries && <EntriesPanel width={320} />}
-        <div style={{
-          flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
-          overflow: 'hidden', background: 'var(--bg-paper)',
-        }}>
-          {children}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden', flex: 1 }}>
+        <UpdateBanner />
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <TabletRail />
+          {withEntries && <EntriesPanel width={320} />}
+          <div style={{
+            flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column',
+            overflow: 'hidden', background: 'var(--bg-paper)',
+          }}>
+            {children}
+          </div>
         </div>
       </div>
     )
@@ -138,6 +139,7 @@ export default function AppLayout({ children }) {
         display: 'flex', flexDirection: 'column', height: '100%',
         width: '100%', overflow: 'hidden', flex: 1, background: 'var(--bg-paper)',
       }}>
+        <UpdateBanner />
         <TabletTopNav />
         <div style={{ flex: 1, minWidth: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           {children}

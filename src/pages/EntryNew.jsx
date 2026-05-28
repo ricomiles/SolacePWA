@@ -25,7 +25,6 @@ function useEntryWriter() {
   const location = useLocation()
   const initialMood = location.state?.mood || null
   const initialPrompt = location.state?.promptText || null
-  const fromPrompt = !!(location.state?.showPrompt)
   const { createEntry } = useEntries()
 
   const [title, setTitle] = useState(location.state?.title || '')
@@ -51,10 +50,6 @@ function useEntryWriter() {
       if (!entryId) {
         const entry = await createEntry({ title, body, mood, prompt })
         setEntryId(entry.id)
-        if (fromPrompt) {
-          const d = new Date()
-          localStorage.setItem('solace_prompt_answered', `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`)
-        }
       }
       setSavedAt(new Date())
       isDirtyRef.current = false
