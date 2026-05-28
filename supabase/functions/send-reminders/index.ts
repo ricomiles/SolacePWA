@@ -36,13 +36,19 @@ Deno.serve(async (req: Request) => {
 
     webPush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey)
 
-    // Determine the current UTC hour as "HH:00" to match reminder_time values.
+    // test=true in the request body skips the time filter and sends to all subscriptions.
+    let testMode = false
+    try { const body = await req.json(); testMode = !!body?.test } catch { /* no body */ }
+
     const now = new Date()
     const currentHour = now.getUTCHours().toString().padStart(2, '0') + ':00'
 
-    // Fetch subscriptions whose reminder_time matches the current UTC hour.
+    const url = testMode
+      ? `${supabaseUrl}/rest/v1/push_subscriptions?select=user_id,subscription`
+      : `${supabaseUrl}/rest/v1/push_subscriptions?reminder_time=eq.${encodeURIComponent(currentHour)}&select=user_id,subscription`
+
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/push_subscriptions?reminder_time=eq.${encodeURIComponent(currentHour)}&select=user_id,subscription`,
+      url,
       {
         headers: {
           apikey: serviceRoleKey,
@@ -83,7 +89,7 @@ Deno.serve(async (req: Request) => {
     const failed  = results.filter(r => r.status === 'rejected').length
 
     return new Response(
-      JSON.stringify({ sent, failed, hour: currentHour }),
+      JSON.stringify({ sent, failed, hour: currentHour, testMode }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (err) {
