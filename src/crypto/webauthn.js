@@ -3,6 +3,10 @@
 
 import { uint8ArrayToBase64, base64ToUint8Array } from './index.js'
 
+// Hardcoded RP ID — must never change after first enrollment or existing passkeys break.
+// Update this when moving to a custom domain, then prompt all users to re-enroll.
+const RP_ID = 'solace-six-virid.vercel.app'
+
 // Domain-specific PRF input — ensures different apps can't share PRF output.
 const PRF_EVAL_INPUT = new TextEncoder().encode('solace-journal-dek-v1')
 
@@ -27,7 +31,7 @@ export async function enrollBiometric(userId) {
     cred = await navigator.credentials.create({
       publicKey: {
         challenge,
-        rp: { name: 'Solace Journal', id: window.location.hostname },
+        rp: { name: 'Solace Journal', id: RP_ID },
         user: { id: userBytes, name: 'solace-user', displayName: 'You' },
         pubKeyCredParams: [
           { type: 'public-key', alg: -7 },   // ES256
@@ -36,7 +40,7 @@ export async function enrollBiometric(userId) {
         authenticatorSelection: {
           authenticatorAttachment: 'platform',
           userVerification: 'required',
-          residentKey: 'preferred',
+          residentKey: 'required',
         },
         extensions: {
           prf: { eval: { first: PRF_EVAL_INPUT } },
@@ -72,6 +76,7 @@ export async function assertBiometric() {
     assertion = await navigator.credentials.get({
       publicKey: {
         challenge,
+        rpId: RP_ID,
         userVerification: 'required',
         extensions: {
           prf: { eval: { first: PRF_EVAL_INPUT } },
