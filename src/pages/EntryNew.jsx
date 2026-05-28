@@ -32,12 +32,14 @@ function useEntryWriter() {
   const [mood, setMood] = useState(initialMood)
   const [savedAt, setSavedAt] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [entryId, setEntryId] = useState(null)
   const [wordCount, setWordCount] = useState(0)
   const prompt = initialPrompt
 
   const autoSaveTimer = useRef(null)
   const isDirtyRef = useRef(false)
+  // Use refs so doSave always reads the latest value without stale closures
+  const entryIdRef = useRef(location.state?.entryId || null)
+  const isCreatingRef = useRef(false)
 
   useEffect(() => {
     setWordCount(body.trim().split(/\s+/).filter(Boolean).length)
@@ -45,20 +47,24 @@ function useEntryWriter() {
 
   const doSave = useCallback(async () => {
     if (!isDirtyRef.current) return
+    if (isCreatingRef.current) return
     setSaving(true)
     try {
-      if (!entryId) {
+      if (!entryIdRef.current) {
+        isCreatingRef.current = true
         const entry = await createEntry({ title, body, mood, prompt })
-        setEntryId(entry.id)
+        entryIdRef.current = entry.id
+        isCreatingRef.current = false
       }
       setSavedAt(new Date())
       isDirtyRef.current = false
     } catch {
+      isCreatingRef.current = false
       // Silently fail — never log content
     } finally {
       setSaving(false)
     }
-  }, [title, body, mood, createEntry, entryId])
+  }, [title, body, mood, createEntry])
 
   useEffect(() => {
     isDirtyRef.current = true
@@ -71,7 +77,7 @@ function useEntryWriter() {
     ? `saved · ${Math.round((Date.now() - savedAt.getTime()) / 60000) || '<1'}m ago`
     : saving ? 'saving…' : 'unsaved'
 
-  return { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedAt, savedLabel, wordCount, doSave, entryId, autoSaveTimer }
+  return { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedAt, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer }
 }
 
 // ── Daily prompt banner ───────────────────────────────────────────────────────
@@ -127,7 +133,7 @@ function PromptBanner({ compact = false }) {
 function DesktopWritingPane() {
   const navigate = useNavigate()
   const bp = useBreakpoint()
-  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const [focusMode, setFocusMode] = useState(false)
 
   const now = new Date()
@@ -224,7 +230,7 @@ function DesktopWritingPane() {
           {/* Mood pill — hidden when mood tracking is disabled */}
           {localStorage.getItem('solace_mood_tracking') !== 'false' && <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
             <button
-              onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
+              onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, entryId: entryIdRef.current, showPrompt: !!prompt, promptText: prompt } })}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px',
                 background: mood ? 'var(--sage-100)' : 'transparent',
@@ -292,7 +298,7 @@ function DesktopWritingPane() {
 // ── Mobile writing view ────────────────────────────────────────────────────────
 function MobileWritingView() {
   const navigate = useNavigate()
-  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const { isTabletPortrait: t } = useBreakpoint()
   const scrollRef = useRef(null)
 
@@ -363,7 +369,7 @@ function MobileWritingView() {
 
         {localStorage.getItem('solace_mood_tracking') !== 'false' && <div style={{ display: 'flex', gap: 8, marginBottom: t ? 32 : 24 }}>
           <button
-            onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, showPrompt: !!prompt, promptText: prompt } })}
+            onClick={() => navigate('/mood', { state: { returnTo: '/new', title, body, entryId: entryIdRef.current, showPrompt: !!prompt, promptText: prompt } })}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: t ? '10px 18px' : '6px 12px',
               background: mood ? 'var(--sage-100)' : 'transparent',

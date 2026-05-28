@@ -60,7 +60,11 @@ export async function enrollBiometric(userId) {
 }
 
 // Assert an existing credential (triggers Face ID / Touch ID) and return PRF output.
-export async function assertBiometric(credentialIdBase64) {
+// Uses discoverable credential lookup (no allowCredentials) so the system can find
+// the passkey even if the stored credential ID drifts (e.g. after reinstall or
+// iCloud Keychain sync). Security is preserved: the PRF output is credential-bound,
+// so unwrapDEK will fail if the wrong passkey is used.
+export async function assertBiometric() {
   const challenge = crypto.getRandomValues(new Uint8Array(32))
 
   let assertion
@@ -68,7 +72,6 @@ export async function assertBiometric(credentialIdBase64) {
     assertion = await navigator.credentials.get({
       publicKey: {
         challenge,
-        allowCredentials: [{ type: 'public-key', id: base64ToUint8Array(credentialIdBase64) }],
         userVerification: 'required',
         extensions: {
           prf: { eval: { first: PRF_EVAL_INPUT } },

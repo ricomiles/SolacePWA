@@ -115,7 +115,7 @@ export default function UnlockScreen() {
     setError('')
     setUnlocking(true)
     try {
-      const prfBytes = await assertBiometric(localAuth.credential_id)
+      const prfBytes = await assertBiometric()
       const key = await unwrapDEK(localAuth.wrapped_dek, localAuth.wrap_iv, prfBytes)
       setKey(key)
       navigate('/home', { replace: true })
