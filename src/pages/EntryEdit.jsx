@@ -8,6 +8,8 @@ import { useEntries } from '../hooks/useEntries'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
+import RichTextEditor from '../components/RichTextEditor'
+import FormattingToolbar from '../components/FormattingToolbar'
 
 const AUTO_SAVE_INTERVAL = 2000
 
@@ -80,7 +82,8 @@ function useEditorState(id) {
   }, [rawEntry, loaded])
 
   useEffect(() => {
-    setWordCount(body.trim().split(/\s+/).filter(Boolean).length)
+    const plain = body.replace(/<[^>]+>/g, ' ')
+    setWordCount(plain.trim().split(/\s+/).filter(Boolean).length)
   }, [body])
 
   const doSave = useCallback(async () => {
@@ -117,6 +120,7 @@ function DesktopEditPane({ id }) {
   const navigate = useNavigate()
   const { title, setTitle, body, setBody, mood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
   const [focusMode, setFocusMode] = useState(false)
+  const [editor, setEditor] = useState(null)
 
   const now = new Date()
   const wd = now.toLocaleString('en', { weekday: 'short' })
@@ -197,13 +201,24 @@ function DesktopEditPane({ id }) {
             placeholder="Title…"
             style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 44, lineHeight: 1.1, letterSpacing: '-0.02em', color: 'var(--ink-900)', padding: 0, margin: '0 0 28px', display: 'block' }}
           />
-          <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
-            placeholder="Continue writing…"
-            autoFocus={loaded}
-            style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, letterSpacing: '-0.005em', minHeight: 400, resize: 'none', display: 'block' }}
-          />
+
+          {/* Formatting toolbar */}
+          <div style={{ display: 'flex', gap: 2, marginBottom: 16, marginLeft: -6 }}>
+            <FormattingToolbar editor={editor} size={30} />
+          </div>
+
+          {loaded && (
+            <RichTextEditor
+              initialContent={body}
+              onChange={setBody}
+              onEditorReady={setEditor}
+              placeholder="Continue writing…"
+              style={{
+                fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.75,
+                color: 'var(--ink-700)', letterSpacing: '-0.005em', minHeight: 400,
+              }}
+            />
+          )}
         </div>
       </div>
 
@@ -238,6 +253,7 @@ function MobileEditView({ id }) {
   const navigate = useNavigate()
   const { title, setTitle, body, setBody, mood, prompt, saving, savedLabel, wordCount, doSave, autoSaveTimer, loaded } = useEditorState(id)
   const { isTabletPortrait: t } = useBreakpoint()
+  const [editor, setEditor] = useState(null)
 
   const now = new Date()
   const dateLabel = now.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
@@ -300,31 +316,24 @@ function MobileEditView({ id }) {
             </div>
           </div>
         )}
-        <textarea
-          value={body}
-          onChange={e => setBody(e.target.value)}
-          placeholder="Continue writing…"
-          autoFocus={loaded}
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
-        />
+        {loaded && (
+          <RichTextEditor
+            initialContent={body}
+            onChange={setBody}
+            onEditorReady={setEditor}
+            placeholder="Continue writing…"
+            style={{
+              fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75,
+              color: 'var(--ink-700)', letterSpacing: -0.1, minHeight: 300,
+            }}
+          />
+        )}
         </div>
       </div>
 
-      <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', width: 'min(calc(100% - 32px), 398px)', padding: '10px 14px', background: 'var(--bg-cream)', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(58,51,43,0.06)', zIndex: 30 }}>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {[
-            <path key="b" d="M4 2h5a3 3 0 010 6 3 3 0 010 6H4V2z" stroke="var(--ink-700)" strokeWidth="1.5" fill="none" />,
-            <g key="i"><line x1="10" y1="2" x2="6" y2="14" stroke="var(--ink-700)" strokeWidth="1.5" /><line x1="4" y1="2" x2="9" y2="2" stroke="var(--ink-700)" strokeWidth="1.5" /><line x1="7" y1="14" x2="12" y2="14" stroke="var(--ink-700)" strokeWidth="1.5" /></g>,
-          ].map((icon, i) => (
-            <div key={i} style={{ width: 36, height: 36, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="16" height="16" viewBox="0 0 16 16">{icon}</svg>
-            </div>
-          ))}
-        </div>
+      <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', width: 'min(calc(100% - 32px), 398px)', padding: '6px 14px', background: 'var(--bg-cream)', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(58,51,43,0.06)', zIndex: 30 }}>
+        <FormattingToolbar editor={editor} size={36} />
         <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, letterSpacing: 0.4 }}>{wordCount} words</div>
-        <div style={{ width: 36, height: 36, borderRadius: 18, background: 'var(--terra-200)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="3" fill="var(--bg-paper)" /></svg>
-        </div>
       </div>
 
       <HomeIndicator />

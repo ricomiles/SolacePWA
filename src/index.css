@@ -398,3 +398,47 @@ textarea {
 .cursor-blink {
   animation: blink 1s step-end infinite;
 }
+
+/* Rich text editor (Tiptap / ProseMirror) */
+.rich-editor .ProseMirror {
+  outline: none;
+}
+
+.rich-editor .ProseMirror > p {
+  margin: 0 0 1.1em;
+}
+
+.rich-editor .ProseMirror > p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--ink-300);
+  pointer-events: none;
+  height: 0;
+}
+
+.rich-editor mark {
+  background-color: #FDE68A;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* Entry body (read view) */
+.entry-body > p {
+  margin: 0 0 20px;
+}
+
+.entry-body > p:last-child {
+  margin-bottom: 0;
+}
+
+.entry-body mark {
+  background-color: #FDE68A;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}

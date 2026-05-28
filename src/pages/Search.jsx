@@ -7,13 +7,17 @@ import EntryCard from '../components/EntryCard'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
 
+function stripHTML(str) {
+  return str ? str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : ''
+}
+
 function useSearch(entries) {
   const [query, setQuery] = useState('')
 
   const fuse = useMemo(() => new Fuse(entries, {
     keys: [
       { name: 'title', weight: 2 },
-      { name: 'body', weight: 1 },
+      { name: 'body', weight: 1, getFn: e => stripHTML(e.body) },
       { name: 'mood', weight: 0.5 },
     ],
     threshold: 0.35,

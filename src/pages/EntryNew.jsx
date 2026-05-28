@@ -5,6 +5,8 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
 import { getDailyPrompt } from '../data/prompts'
+import RichTextEditor from '../components/RichTextEditor'
+import FormattingToolbar from '../components/FormattingToolbar'
 
 const AUTO_SAVE_INTERVAL = 2000
 
@@ -45,7 +47,8 @@ function useEntryWriter() {
   const isCreatingRef = useRef(false)
 
   useEffect(() => {
-    setWordCount(body.trim().split(/\s+/).filter(Boolean).length)
+    const plain = body.replace(/<[^>]+>/g, ' ')
+    setWordCount(plain.trim().split(/\s+/).filter(Boolean).length)
   }, [body])
 
   const doSave = useCallback(async () => {
@@ -138,6 +141,7 @@ function DesktopWritingPane() {
   const bp = useBreakpoint()
   const { title, setTitle, body, setBody, mood, setMood, moodColor, setMoodColor, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const [focusMode, setFocusMode] = useState(false)
+  const [editor, setEditor] = useState(null)
 
   const now = new Date()
   const wd = now.toLocaleString('en', { weekday: 'short' })
@@ -251,16 +255,19 @@ function DesktopWritingPane() {
             </button>
           </div>}
 
-          <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
+          {/* Formatting toolbar */}
+          <div style={{ display: 'flex', gap: 2, marginBottom: 16, marginLeft: -6 }}>
+            <FormattingToolbar editor={editor} size={30} />
+          </div>
+
+          <RichTextEditor
+            initialContent={body}
+            onChange={setBody}
+            onEditorReady={setEditor}
             placeholder="Begin writing here…"
-            autoFocus
             style={{
-              width: '100%', border: 'none', background: 'transparent', outline: 'none',
-              fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.75, color: 'var(--ink-700)',
-              padding: 0, letterSpacing: '-0.005em', minHeight: 400, resize: 'none',
-              display: 'block',
+              fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.75,
+              color: 'var(--ink-700)', letterSpacing: '-0.005em', minHeight: 400,
             }}
           />
         </div>
@@ -304,6 +311,7 @@ function MobileWritingView() {
   const { title, setTitle, body, setBody, mood, setMood, moodColor, setMoodColor, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const { isTabletPortrait: t } = useBreakpoint()
   const scrollRef = useRef(null)
+  const [editor, setEditor] = useState(null)
 
   // Prevent iOS from scrolling to the textarea on mount — keep title visible
   useEffect(() => {
@@ -390,42 +398,30 @@ function MobileWritingView() {
           </button>
         </div>}
 
-        <textarea
-          value={body}
-          onChange={e => setBody(e.target.value)}
+        <RichTextEditor
+          initialContent={body}
+          onChange={setBody}
+          onEditorReady={setEditor}
           placeholder="Begin writing here…"
-          style={{ width: '100%', border: 'none', background: 'transparent', fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)', padding: 0, outline: 'none', letterSpacing: -0.1, minHeight: 300, resize: 'none' }}
+          style={{
+            fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75,
+            color: 'var(--ink-700)', letterSpacing: -0.1, minHeight: 300,
+          }}
         />
         </div>
       </div>
 
-      {/* Bottom toolbar */}
+      {/* Bottom formatting toolbar */}
       <div style={{
         position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-        width: 'min(calc(100% - 32px), 398px)', padding: '10px 14px',
+        width: 'min(calc(100% - 32px), 398px)', padding: '6px 14px',
         background: 'var(--bg-cream)', borderRadius: 999,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         boxShadow: '0 2px 8px rgba(58,51,43,0.06)', zIndex: 30,
       }}>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {[
-            <path key="b" d="M4 2h5a3 3 0 010 6 3 3 0 010 6H4V2z" stroke="var(--ink-700)" strokeWidth="1.5" fill="none" />,
-            <g key="i"><line x1="10" y1="2" x2="6" y2="14" stroke="var(--ink-700)" strokeWidth="1.5" /><line x1="4" y1="2" x2="9" y2="2" stroke="var(--ink-700)" strokeWidth="1.5" /><line x1="7" y1="14" x2="12" y2="14" stroke="var(--ink-700)" strokeWidth="1.5" /></g>,
-            <g key="q"><path d="M3 6c0-1 1-2 2-2 1 0 2 1 2 2 0 1-1 2-2 2v2M9 6c0-1 1-2 2-2 1 0 2 1 2 2 0 1-1 2-2 2v2" stroke="var(--ink-700)" strokeWidth="1.4" fill="none" strokeLinecap="round" /></g>,
-          ].map((icon, i) => (
-            <div key={i} style={{ width: 36, height: 36, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="16" height="16" viewBox="0 0 16 16">{icon}</svg>
-            </div>
-          ))}
-        </div>
+        <FormattingToolbar editor={editor} size={36} />
         <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, letterSpacing: 0.4 }}>
           {wordCount} words
-        </div>
-        <div style={{ width: 36, height: 36, borderRadius: 18, background: 'var(--terra-200)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="3" fill="var(--bg-paper)" />
-            <rect x="6" y="0" width="2" height="14" fill="var(--bg-paper)" />
-          </svg>
         </div>
       </div>
 

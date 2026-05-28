@@ -10,6 +10,23 @@ import MoodDot from '../components/MoodDot'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
 
+function renderBody(body, style) {
+  if (!body) return null
+  if (body.trimStart().startsWith('<')) {
+    return <div className="entry-body" style={style} dangerouslySetInnerHTML={{ __html: body }} />
+  }
+  return body.split(/\n+/).filter(p => p.trim()).map((para, i) => {
+    if (para.startsWith('>')) {
+      return (
+        <blockquote key={i} style={{ margin: '0 0 20px', padding: '0 0 0 18px', borderLeft: '2px solid var(--terra-200)', fontStyle: 'italic', ...style }}>
+          {para.slice(1).trim()}
+        </blockquote>
+      )
+    }
+    return <p key={i} style={{ margin: '0 0 20px', ...style }}>{para}</p>
+  })
+}
+
 const MOOD_COLORS = {
   calm: '#9CA888',
   tender: '#D8A892',
@@ -72,9 +89,8 @@ function DesktopReadingPane({ id }) {
   const year = date.getFullYear()
   const hour = date.getHours()
   const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
-  const wordCount = body.trim().split(/\s+/).filter(Boolean).length
+  const wordCount = body.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length
   const moodColor = mood ? (MOOD_COLORS[mood] || 'var(--ink-300)') : null
-  const paragraphs = body.split(/\n+/).filter(p => p.trim())
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this entry? This cannot be undone.')) return
@@ -144,26 +160,10 @@ function DesktopReadingPane({ id }) {
             </div>
           )}
 
-          {/* Body paragraphs */}
-          {paragraphs.map((para, idx) => {
-            if (para.startsWith('>')) {
-              return (
-                <blockquote key={idx} style={{
-                  margin: '0 0 20px', padding: '0 0 0 18px',
-                  borderLeft: '2px solid var(--terra-200)',
-                  fontFamily: 'var(--serif)', fontStyle: 'italic',
-                  fontSize: 19, lineHeight: 1.7, color: 'var(--ink-700)',
-                }}>
-                  {para.slice(1).trim()}
-                </blockquote>
-              )
-            }
-            return (
-              <p key={idx} style={{
-                fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.7,
-                color: 'var(--ink-700)', margin: '0 0 20px', letterSpacing: '-0.005em',
-              }}>{para}</p>
-            )
+          {/* Body */}
+          {renderBody(body, {
+            fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.7,
+            color: 'var(--ink-700)', letterSpacing: '-0.005em',
           })}
 
           {/* Tags + word count */}
@@ -233,8 +233,9 @@ function MobileReadingView({ id }) {
   const dateLabel = date.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'long' })
   const hour = date.getHours()
   const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
-  const wordCount = body.trim().split(/\s+/).filter(Boolean).length
-  const paragraphs = body.split(/\n+/).filter(p => p.trim())
+  const wordCount = body.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length
+  const isHTMLBody = body.trimStart().startsWith('<')
+  const paragraphs = isHTMLBody ? [] : body.split(/\n+/).filter(p => p.trim())
 
   return (
     <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column' }}>
@@ -319,7 +320,13 @@ function MobileReadingView({ id }) {
           </div>
         )}
 
-        {paragraphs.map((para, idx) => {
+        {isHTMLBody ? (
+          <div
+            className="entry-body"
+            style={{ fontFamily: 'var(--serif)', fontSize: t ? 24 : 18, lineHeight: 1.75, color: 'var(--ink-700)' }}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : paragraphs.map((para, idx) => {
           if (idx === 0 && para.length > 0) {
             const firstChar = para[0]
             const rest = para.slice(1)

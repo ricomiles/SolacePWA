@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import MoodDot from './MoodDot'
 
+function stripHTML(str) {
+  return str ? str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : ''
+}
+
 export default function EntryCard({ entry, variant = 'list', first = false }) {
   const navigate = useNavigate()
 
@@ -22,7 +26,7 @@ export default function EntryCard({ entry, variant = 'list', first = false }) {
         <div style={{ flex: 1, padding: '12px 16px', background: 'var(--bg-paper)', borderRadius: 14, boxShadow: '0 1px 2px rgba(58,51,43,0.04)' }}>
           <div style={{ fontFamily: 'var(--serif)', fontSize: 16, fontWeight: 500, color: 'var(--ink-900)', lineHeight: 1.25 }}>{entry.title || 'Untitled'}</div>
           {entry.body && (
-            <div className="line-clamp-2" style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', lineHeight: 1.5, marginTop: 4 }}>{entry.body}</div>
+            <div className="line-clamp-2" style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', lineHeight: 1.5, marginTop: 4 }}>{stripHTML(entry.body)}</div>
           )}
         </div>
       </div>

@@ -51,7 +51,7 @@ export function useEntries() {
             mood: parsed.mood || null,
             moodColor: parsed.moodColor || null,
             prompt: parsed.prompt || null,
-            wordCount: parsed.body ? parsed.body.trim().split(/\s+/).filter(Boolean).length : 0,
+            wordCount: parsed.body ? parsed.body.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length : 0,
           }
         } catch {
           // If decryption fails, return entry without plaintext fields

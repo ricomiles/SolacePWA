@@ -12,6 +12,7 @@ dist/
 # Design handoffs — source-of-truth is the design tool, not the repo
 design_handoff**
 Handoff.**
+feature-requests.md
 
 # Vite / editor
 .vite/
