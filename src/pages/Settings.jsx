@@ -117,6 +117,12 @@ export default function Settings() {
   const bp = useBreakpoint()
   const t = bp.isTabletPortrait
 
+  const [authMethod, setAuthMethod] = useState(null)
+  useEffect(() => {
+    if (!user) return
+    db.localAuth.get(user.id).then(auth => setAuthMethod(auth?.method || null))
+  }, [user])
+
   const [promptEnabled, setPromptEnabled] = useState(
     () => localStorage.getItem('solace_daily_prompt') !== 'false'
   )
@@ -210,6 +216,11 @@ export default function Settings() {
   const handleLockJournal = async () => {
     clearKey()
     navigate('/unlock', { replace: true })
+  }
+
+  const handleReenrollBiometrics = async () => {
+    await db.localAuth.delete(user.id)
+    navigate('/phrase')
   }
 
   const handleExport = () => {
@@ -314,6 +325,7 @@ export default function Settings() {
 
         <Card header="Privacy" t={t}>
           <Row t={t} icon={{ bg: 'var(--bg-cream)', fg: 'var(--ink-700)', glyph: '⊙' }} title="Lock journal" onClick={handleLockJournal} />
+          {authMethod === 'prf' && <Row t={t} icon={{ bg: 'var(--terra-50)', fg: 'var(--terra-400)', glyph: '↺' }} title="Re-enroll Face ID" onClick={handleReenrollBiometrics} />}
           <Row t={t} icon={{ bg: 'var(--bg-cream)', fg: 'var(--ink-700)', glyph: '↓' }} title="Export & backup" last onClick={handleExport} />
         </Card>
 
