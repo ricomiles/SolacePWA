@@ -364,7 +364,7 @@ function TabletPortraitHome() {
                       <div style={{
                         fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-500)', lineHeight: 1.5,
                         display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                      }}>{entry.body}</div>
+                      }}>{entry.body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}</div>
                     )}
                   </div>
                 </div>

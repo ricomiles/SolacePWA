@@ -53,7 +53,7 @@ export default function EntryCard({ entry, variant = 'list', first = false }) {
         </div>
         {entry.body && (
           <div className="line-clamp-2" style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--ink-500)', lineHeight: 1.45 }}>
-            {entry.body}
+            {stripHTML(entry.body)}
           </div>
         )}
         {entry.mood && (

@@ -180,16 +180,14 @@ function DesktopWritingPane() {
             {savedLabel}
           </div>
           <div style={{ flex: 1 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', fontWeight: 500 }}>
-            <span>{wordCount} words</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FormattingToolbar editor={editor} size={30} />
             {mood && (
-              <>
-                <span>·</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood, moodColor) }} />
-                  {mood}
-                </span>
-              </>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', fontWeight: 500, marginLeft: 4 }}>
+                <span style={{ width: 1, height: 14, background: 'var(--hairline-strong)', display: 'inline-block' }} />
+                <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood, moodColor) }} />
+                <span>{mood}</span>
+              </div>
             )}
             <button
               onClick={() => setFocusMode(true)}
@@ -197,7 +195,7 @@ function DesktopWritingPane() {
               style={{
                 padding: '4px 10px', borderRadius: 6, background: 'rgba(58,51,43,0.05)',
                 fontWeight: 600, color: 'var(--ink-700)', border: 'none', cursor: 'pointer',
-                fontFamily: 'var(--sans)', fontSize: 11,
+                fontFamily: 'var(--sans)', fontSize: 11, marginLeft: 4,
               }}
             >⌘. Focus</button>
             <button
@@ -254,11 +252,6 @@ function DesktopWritingPane() {
               ) : '+ mood'}
             </button>
           </div>}
-
-          {/* Formatting toolbar */}
-          <div style={{ display: 'flex', gap: 2, marginBottom: 16, marginLeft: -6 }}>
-            <FormattingToolbar editor={editor} size={30} />
-          </div>
 
           <RichTextEditor
             initialContent={body}
