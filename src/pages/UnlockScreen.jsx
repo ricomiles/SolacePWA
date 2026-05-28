@@ -7,6 +7,7 @@ import { setKey } from '../store/cryptoStore'
 import { setRawDEK } from '../store/setupStore'
 import { fetchSalt } from '../services/auth'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../supabaseClient'
 import db from '../db'
 import StatusBar from '../components/StatusBar'
 import HomeIndicator from '../components/HomeIndicator'
@@ -226,6 +227,16 @@ export default function UnlockScreen() {
           </div>
         )}
       </div>
+      <button
+        onClick={() => supabase.auth.signOut()}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-400)',
+          padding: '12px 0 8px', width: '100%', textAlign: 'center',
+        }}
+      >
+        Sign out
+      </button>
       <HomeIndicator />
     </div>
   )
