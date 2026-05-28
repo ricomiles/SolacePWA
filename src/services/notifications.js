@@ -11,6 +11,14 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
 }
 
+// Convert "HH:MM" local time string to "HH:00" UTC string for server-side matching
+function localTimeToUTC(localTime) {
+  const [h, m] = localTime.split(':').map(Number)
+  const d = new Date()
+  d.setHours(h, m, 0, 0)
+  return d.getUTCHours().toString().padStart(2, '0') + ':00'
+}
+
 /**
  * Ask the browser for Notification permission.
  * Returns true if granted, false otherwise.
@@ -51,7 +59,7 @@ export async function subscribeToPush(userId, reminderTime, streakNudge) {
     {
       user_id: userId,
       subscription: subscription.toJSON(),
-      reminder_time: reminderTime,
+      reminder_time: localTimeToUTC(reminderTime),
       streak_nudge: streakNudge,
     },
     { onConflict: 'user_id' },
@@ -96,7 +104,7 @@ export async function unsubscribeFromPush(userId) {
 export async function updateReminderSettings(userId, reminderTime, streakNudge) {
   const { error } = await supabase
     .from('push_subscriptions')
-    .update({ reminder_time: reminderTime, streak_nudge: streakNudge })
+    .update({ reminder_time: localTimeToUTC(reminderTime), streak_nudge: streakNudge })
     .eq('user_id', userId)
 
   if (error) throw error
