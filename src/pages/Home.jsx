@@ -413,6 +413,19 @@ function MobileHome() {
           <SolaceLogoInline size={18} sun="var(--terra-200)" line="var(--ink-900)" wordColor="var(--ink-900)" />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button
+              onClick={() => navigate('/search')}
+              style={{
+                width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',
+                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="6.5" cy="6.5" r="4.5" stroke="var(--terra-400)" strokeWidth="1.4" />
+                <path d="M10 10l3.5 3.5" stroke="var(--terra-400)" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </button>
+            <button
               onClick={() => navigate('/calendar')}
               style={{
                 width: 36, height: 36, borderRadius: 18, background: 'var(--terra-50)',

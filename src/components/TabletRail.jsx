@@ -28,6 +28,17 @@ const ITEMS = [
     ),
   },
   {
+    key: 'search',
+    path: '/search',
+    label: 'Search',
+    icon: (active) => (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="8.5" cy="8.5" r="5" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} />
+        <path d="M13 13l4 4" stroke="currentColor" strokeWidth={active ? 1.8 : 1.5} strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     key: 'settings',
     path: '/settings',
     label: 'You',

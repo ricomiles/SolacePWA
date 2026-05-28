@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { SolaceLogoInline } from './SolaceLogo'
 import { useEntries } from '../hooks/useEntries'
 import { useAuth } from '../hooks/useAuth'
@@ -96,6 +97,17 @@ export default function DesktopSidebar() {
   const streak = computeStreak(entries)
   const initial = user?.email?.[0]?.toUpperCase() || 'S'
 
+  useEffect(() => {
+    const handler = e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        navigate('/search')
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [navigate])
+
   // Unique moods from entries as "tags"
   const moodTags = [...new Set(entries.map(e => e.mood).filter(Boolean))].slice(0, 7)
 
@@ -112,14 +124,20 @@ export default function DesktopSidebar() {
 
       {/* Search */}
       <div style={{ padding: '8px 12px 6px' }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8, height: 30,
-          padding: '0 10px', borderRadius: 8, background: 'rgba(58,51,43,0.05)',
-          fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', cursor: 'text',
-        }}>
+        <div
+          onClick={() => navigate('/search')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, height: 30,
+            padding: '0 10px', borderRadius: 8,
+            background: location.pathname === '/search' ? 'var(--terra-100)' : 'rgba(58,51,43,0.05)',
+            fontFamily: 'var(--sans)', fontSize: 12,
+            color: location.pathname === '/search' ? 'var(--ink-900)' : 'var(--ink-500)',
+            cursor: 'pointer',
+          }}
+        >
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <circle cx="5" cy="5" r="3.5" stroke="var(--ink-500)" strokeWidth="1.4" fill="none" />
-            <path d="M7.5 7.5l3 3" stroke="var(--ink-500)" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="5" cy="5" r="3.5" stroke="currentColor" strokeWidth="1.4" fill="none" />
+            <path d="M7.5 7.5l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
           <span style={{ flex: 1 }}>Search entries</span>
           <span style={{

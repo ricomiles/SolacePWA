@@ -33,6 +33,20 @@ function TabletTopNav() {
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <button
+          onClick={() => navigate('/search')}
+          title="Search"
+          style={{
+            width: 34, height: 34, borderRadius: 17, background: 'var(--bg-warm)',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="4.5" stroke="var(--ink-700)" strokeWidth="1.4" />
+            <path d="M10 10l3.5 3.5" stroke="var(--ink-700)" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button
           onClick={() => navigate('/calendar')}
           title="Calendar"
           style={{
