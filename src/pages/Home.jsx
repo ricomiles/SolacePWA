@@ -11,7 +11,7 @@ import EntryCard from '../components/EntryCard'
 import OfflineBanner from '../components/OfflineBanner'
 import IOSInstallBanner from '../components/IOSInstallBanner'
 import { SolaceLogoInline } from '../components/SolaceLogo'
-import { getDailyPrompt } from '../data/prompts'
+import { getDailyPrompt, getPromptForDate, hasTodayEntry } from '../data/prompts'
 
 const MOOD_COLORS = {
   calm: '#9CA888',
@@ -77,51 +77,155 @@ function PromptCard({ onWrite, onSkip, size = 'mobile' }) {
   )
 }
 
+function computeStreak(entries) {
+  if (!entries.length) return 0
+  const days = new Set(entries.map(e => {
+    const d = new Date(e.client_updated_at || e.created_at)
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+  }))
+  let streak = 0
+  const today = new Date()
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i)
+    if (days.has(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`)) streak++
+    else if (i > 0) break
+  }
+  return streak
+}
+
 // ── Desktop / iPad landscape right-pane placeholder ──────────────────────────
 function DesktopHomePlaceholder() {
   const navigate = useNavigate()
   const { entries } = useEntries()
   const promptEnabled = localStorage.getItem('solace_daily_prompt') !== 'false'
 
-  return (
-    <div style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--bg-paper)', flexDirection: 'column', gap: 20,
-      padding: 48, overflow: 'auto',
-    }}>
-      <div style={{
-        textAlign: 'center', maxWidth: 440,
-      }}>
-        <div style={{
-          fontFamily: 'var(--serif)', fontSize: 36, fontWeight: 400,
-          color: 'var(--ink-900)', letterSpacing: '-0.02em', marginBottom: 12,
-          lineHeight: 1.15,
-        }}>
-          {entries.length === 0
-            ? 'Your journal is empty.'
-            : 'Select an entry,\nor write a new one.'}
+  const now = new Date()
+  const wd = now.toLocaleString('en', { weekday: 'long' })
+  const day = now.getDate()
+  const month = now.toLocaleString('en', { month: 'long' })
+  const hour = now.getHours()
+  const timeLabel = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
+  const streak = computeStreak(entries)
+  const prompt = getDailyPrompt()
+
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`
+  // answered = prompt was responded to today (not just any entry written)
+  const answered = localStorage.getItem('solace_prompt_answered') === todayKey
+  // still need an entry to link to in "View today's entry"
+  const todayEntry = entries.find(e => {
+    const d = new Date(e.client_updated_at || e.created_at)
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayKey
+  })
+
+  if (promptEnabled) {
+    const recentDays = Array.from({ length: 5 }, (_, i) => {
+      const d = new Date(now); d.setDate(now.getDate() - (i + 1))
+      const dKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      const entry = entries.find(e => {
+        const ed = new Date(e.client_updated_at || e.created_at)
+        return `${ed.getFullYear()}-${ed.getMonth()}-${ed.getDate()}` === dKey
+      })
+      if (!entry) return null
+      return {
+        label: d.toLocaleString('en', { weekday: 'short' }) + ' · ' + d.getDate() + ' ' + d.toLocaleString('en', { month: 'short' }),
+        promptText: getPromptForDate(d),
+        entryId: entry.id,
+      }
+    }).filter(Boolean)
+
+    return (
+      <div style={{ flex: 1, height: '100%', background: 'var(--bg-paper)', overflow: 'auto', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: -120, right: -80, width: 360, height: 360, borderRadius: '50%', background: 'var(--terra-50)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -100, left: 60, width: 220, height: 220, borderRadius: '50%', background: 'var(--sage-100)', opacity: 0.6, pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', maxWidth: 720, margin: '0 auto', padding: '64px 64px 80px' }}>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--terra-400)', fontWeight: 700 }}>
+            {wd} · {day} {month} · {timeLabel}
+          </div>
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--ink-500)', marginTop: 8 }}>
+            Today's prompt{streak > 1 ? ` — ${streak} day streak` : ''}
+          </div>
+
+          <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 'clamp(40px, 4.5vw, 64px)', lineHeight: 1.05, letterSpacing: '-0.025em', color: 'var(--ink-900)', margin: '36px 0 22px', maxWidth: 620 }}>
+            {prompt}
+          </h1>
+
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 19, color: 'var(--ink-500)', lineHeight: 1.55, maxWidth: 540 }}>
+            Five minutes. No audience. Begin anywhere — the first sentence is just to find the second.
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 36 }}>
+            {answered ? (
+              <>
+                <button
+                  onClick={() => navigate('/new')}
+                  style={{ padding: '13px 28px', borderRadius: 999, background: 'var(--ink-900)', color: 'var(--bg-paper)', fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                >Write freely</button>
+                <button
+                  onClick={() => navigate(`/entry/${todayEntry.id}`)}
+                  style={{ padding: '13px 22px', borderRadius: 999, background: 'transparent', border: '1px solid var(--hairline-strong)', fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--ink-700)', cursor: 'pointer' }}
+                >View entry</button>
+                <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--terra-400)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, marginLeft: 4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--terra-300)' }} /> written today
+                </span>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/new', { state: { showPrompt: true, promptText: prompt } })}
+                  style={{ padding: '13px 28px', borderRadius: 999, background: 'var(--ink-900)', color: 'var(--bg-paper)', fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                >Begin writing</button>
+                <button
+                  onClick={() => navigate('/new')}
+                  style={{ padding: '13px 22px', borderRadius: 999, background: 'transparent', border: '1px solid var(--hairline-strong)', fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--ink-700)', cursor: 'pointer' }}
+                >Skip — write freely</button>
+                <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--ink-500)', fontWeight: 500, marginLeft: 8 }}>
+                  <kbd style={{ padding: '2px 6px', borderRadius: 4, background: 'rgba(58,51,43,0.05)', fontFamily: 'var(--sans)', fontStyle: 'normal' }}>↵</kbd> begin
+                </span>
+              </>
+            )}
+          </div>
+
+          {recentDays.length > 0 && (
+            <div style={{ marginTop: 64, paddingTop: 28, borderTop: '1px solid var(--hairline)' }}>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 700, marginBottom: 14 }}>
+                Recent prompts
+              </div>
+              {recentDays.map((row, i) => (
+                <div
+                  key={i}
+                  onClick={() => navigate(`/entry/${row.entryId}`)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 0', borderBottom: '1px solid var(--hairline)', cursor: 'pointer' }}
+                >
+                  <span style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-500)', fontWeight: 700, width: 100, flexShrink: 0 }}>{row.label}</span>
+                  <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink-700)', flex: 1, lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{row.promptText}</span>
+                  <span style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--terra-400)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--terra-300)' }} /> answered
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <p style={{
-          fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16,
-          color: 'var(--ink-500)', lineHeight: 1.6, marginBottom: 32,
-        }}>
+      </div>
+    )
+  }
+
+  // Prompt disabled — plain placeholder
+  return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-paper)', flexDirection: 'column', gap: 20, padding: 48, overflow: 'auto' }}>
+      <div style={{ textAlign: 'center', maxWidth: 440 }}>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 36, fontWeight: 400, color: 'var(--ink-900)', letterSpacing: '-0.02em', marginBottom: 12, lineHeight: 1.15 }}>
+          {entries.length === 0 ? 'Your journal is empty.' : 'Select an entry,\nor write a new one.'}
+        </div>
+        <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink-500)', lineHeight: 1.6, marginBottom: 32 }}>
           {entries.length === 0
             ? 'A quiet place for your thinking.\nFive minutes. One page. Just you.'
             : 'Choose from the list on the left, or start something new.'}
         </p>
-        {promptEnabled && (
-          <div style={{ marginBottom: 28 }}>
-            <PromptCard size="desktop" onWrite={() => navigate('/new', { state: { showPrompt: true, promptText: getDailyPrompt() } })} />
-          </div>
-        )}
         <button
           onClick={() => navigate('/new')}
-          style={{
-            padding: '14px 32px', background: 'var(--ink-900)', color: 'var(--bg-paper)',
-            border: 'none', borderRadius: 999, fontFamily: 'var(--sans)',
-            fontSize: 14, fontWeight: 600, cursor: 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-          }}
+          style={{ padding: '14px 32px', background: 'var(--ink-900)', color: 'var(--bg-paper)', border: 'none', borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
         >
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M1.5 9.5L9 2l2.5 2.5-7.5 7.5H1.5v-2.5z" stroke="var(--bg-paper)" strokeWidth="1.4" strokeLinejoin="round" fill="none" />

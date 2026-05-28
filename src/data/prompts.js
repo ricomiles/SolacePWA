@@ -145,3 +145,18 @@ export function getDailyPrompt() {
   const epochDays = Math.floor(Date.now() / 86400000)
   return PROMPTS[epochDays % PROMPTS.length]
 }
+
+export function getPromptForDate(date) {
+  const epochDays = Math.floor(date.getTime() / 86400000)
+  return PROMPTS[epochDays % PROMPTS.length]
+}
+
+export function hasTodayEntry(entries) {
+  const t = new Date()
+  const key = `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`
+  return entries.some(e => {
+    const d = new Date(e.client_updated_at || e.created_at)
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === key
+  })
+}
+
