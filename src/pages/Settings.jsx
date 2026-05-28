@@ -291,7 +291,12 @@ export default function Settings() {
               <input
                 type="time"
                 value={reminderTime}
-                onChange={e => handleReminderTimeChange(e.target.value)}
+                step="3600"
+                onChange={e => {
+                  // Snap to whole hour — cron runs hourly so :30 would never fire
+                  const snapped = e.target.value.slice(0, 3) + '00'
+                  handleReminderTimeChange(snapped)
+                }}
                 style={{ fontFamily: 'var(--sans)', fontSize: t ? 18 : 15, color: 'var(--ink-700)', background: 'transparent', border: 'none', outline: 'none', cursor: 'pointer' }}
               />
             </div>
