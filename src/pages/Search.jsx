@@ -130,6 +130,7 @@ function MobileSearch() {
 
 // ── Desktop / tablet landscape ─────────────────────────────────────────────────
 function DesktopSearch() {
+  const navigate = useNavigate()
   const { entries, loading } = useEntries()
   const { query, setQuery, results } = useSearch(entries)
   const inputRef = useRef(null)
@@ -142,9 +143,17 @@ function DesktopSearch() {
   return (
     <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Search bar */}
-      <div style={{ padding: '32px 48px 0', flexShrink: 0, borderBottom: '1px solid var(--hairline)', paddingBottom: 24 }}>
+      <div style={{ padding: '32px 48px 0', flexShrink: 0, borderBottom: '1px solid var(--hairline)', paddingBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ background: 'none', border: 'none', padding: '4px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M13 4L7 10l6 6" stroke="var(--ink-700)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
+          flex: 1, display: 'flex', alignItems: 'center', gap: 12,
           background: 'var(--terra-50)', borderRadius: 14,
           padding: '14px 20px',
         }}>
