@@ -16,8 +16,8 @@ export function getMoodColors(mood) {
   return MOOD_COLORS[mood] || MOOD_COLORS.calm
 }
 
-export default function MoodDot({ mood, size = 8 }) {
-  const { dot } = getMoodColors(mood)
+export default function MoodDot({ mood, size = 8, color }) {
+  const dot = color || getMoodColors(mood).dot
   return (
     <span
       style={{

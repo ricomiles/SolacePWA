@@ -13,6 +13,12 @@ const MOODS = [
   { name: 'heavy',    color: '#C9B8A8', dot: '#8B7E6E', adj: 'tired, slow, weighted' },
 ]
 
+const PALETTE = [
+  '#E8C4B0', '#D8A892', '#C4957A', '#B87858',
+  '#DCDDC7', '#B8C4A8', '#9CA888', '#7A9070',
+  '#C9C0B8', '#B8B0C8', '#8BAAC0', '#C9B080',
+]
+
 function timeLabel() {
   const h = new Date().getHours()
   return h < 12 ? 'This morning' : h < 17 ? 'This afternoon' : 'Tonight'
@@ -28,21 +34,53 @@ function useMoodNav() {
     showPrompt: location.state?.showPrompt,
     promptText: location.state?.promptText,
   }
-
-  const go = (mood, note) => {
+  const go = (mood, moodColor) => {
     navigate(returnTo, {
       replace: true,
-      state: { mood: mood || undefined, moodNote: note || undefined, ...draft },
+      state: { mood: mood || undefined, moodColor: moodColor || undefined, ...draft },
     })
   }
   return go
 }
 
+function ColorSwatch({ hex, selected, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(hex)}
+      style={{
+        width: 28, height: 28, borderRadius: 14,
+        background: hex, border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0,
+        boxShadow: selected ? '0 0 0 2px var(--bg-cream), 0 0 0 4px var(--ink-900)' : 'none',
+        transition: 'box-shadow 0.12s',
+      }}
+    />
+  )
+}
+
 // ── Desktop / iPad landscape — card panel ─────────────────────────────────────
 function DesktopMoodPanel() {
   const [selected, setSelected] = useState(null)
-  const [note, setNote] = useState('')
+  const [customColor, setCustomColor] = useState(null)
+  const [customWord, setCustomWord] = useState('')
   const go = useMoodNav()
+
+  const handlePreset = name => {
+    setSelected(name)
+    setCustomColor(null)
+  }
+
+  const handleSwatch = hex => {
+    setCustomColor(hex)
+    setSelected(null)
+  }
+
+  const canContinue = selected || (customColor && customWord.trim())
+
+  const handleGo = () => {
+    if (!canContinue) return
+    if (selected) go(selected, null)
+    else go(customWord.trim(), customColor)
+  }
 
   return (
     <div style={{
@@ -62,22 +100,23 @@ function DesktopMoodPanel() {
           <em style={{ fontStyle: 'italic', color: 'var(--terra-300)'}}> here?</em>
         </h2>
         <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink-500)' }}>
-          One word. It can change tomorrow.
+          Pick one, or name your own.
         </div>
 
-        {/* 3×2 rectangular mood grid */}
+        {/* Preset mood grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 28 }}>
           {MOODS.map(m => {
             const sel = selected === m.name
             return (
               <button
                 key={m.name}
-                onClick={() => setSelected(m.name)}
+                onClick={() => handlePreset(m.name)}
                 style={{
                   padding: '18px 20px', borderRadius: 14, textAlign: 'left',
                   background: sel ? m.color : 'var(--bg-paper)',
                   border: sel ? `2px solid ${m.dot}` : '2px solid transparent',
-                  cursor: 'pointer', transition: 'background 0.15s, border 0.15s',
+                  cursor: 'pointer', transition: 'background 0.15s, border 0.15s, opacity 0.15s',
+                  opacity: customColor ? 0.45 : 1,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -90,16 +129,30 @@ function DesktopMoodPanel() {
           })}
         </div>
 
-        {/* Optional word */}
-        <div style={{ marginTop: 24 }}>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: 1.6, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: 8 }}>
-            One word for today (optional)
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '24px 0' }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
+          <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 13, color: 'var(--ink-400)', whiteSpace: 'nowrap' }}>or name your own</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
+        </div>
+
+        {/* Custom mood builder */}
+        <div style={{ opacity: selected ? 0.45 : 1, transition: 'opacity 0.15s' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+            {PALETTE.map(hex => (
+              <ColorSwatch key={hex} hex={hex} selected={customColor === hex} onSelect={handleSwatch} />
+            ))}
           </div>
-          <div style={{ padding: '14px 16px', background: 'var(--bg-paper)', borderRadius: 12, border: '1px solid var(--hairline)' }}>
+          <div style={{
+            padding: '14px 16px', background: 'var(--bg-paper)', borderRadius: 12,
+            border: `1.5px solid ${customColor || 'var(--hairline)'}`,
+            transition: 'border-color 0.15s',
+          }}>
             <input
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="gentle, slow, golden…"
+              value={customWord}
+              onChange={e => setCustomWord(e.target.value)}
+              placeholder="one word for today…"
+              maxLength={32}
               style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink-900)' }}
             />
           </div>
@@ -107,11 +160,15 @@ function DesktopMoodPanel() {
 
         <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
-            onClick={() => go(selected, note)}
+            onClick={handleGo}
+            disabled={!canContinue}
             style={{
-              padding: '11px 24px', background: 'var(--ink-900)', color: 'var(--bg-paper)',
+              padding: '11px 24px',
+              background: canContinue ? 'var(--ink-900)' : 'var(--hairline-strong)',
+              color: canContinue ? 'var(--bg-paper)' : 'var(--ink-400)',
               borderRadius: 999, fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600,
-              border: 'none', cursor: 'pointer',
+              border: 'none', cursor: canContinue ? 'pointer' : 'default',
+              transition: 'background 0.15s, color 0.15s',
             }}
           >Begin writing</button>
           <button
@@ -127,11 +184,30 @@ function DesktopMoodPanel() {
 // ── Mobile / iPad portrait — full-screen circles ───────────────────────────────
 function MobileMoodScreen() {
   const [selected, setSelected] = useState(null)
-  const [note, setNote] = useState('')
+  const [customColor, setCustomColor] = useState(null)
+  const [customWord, setCustomWord] = useState('')
   const go = useMoodNav()
   const { isTabletPortrait: t } = useBreakpoint()
 
   const circleSize = t ? 110 : 78
+
+  const handlePreset = name => {
+    setSelected(name)
+    setCustomColor(null)
+  }
+
+  const handleSwatch = hex => {
+    setCustomColor(hex)
+    setSelected(null)
+  }
+
+  const canContinue = selected || (customColor && customWord.trim())
+
+  const handleGo = () => {
+    if (selected) go(selected, null)
+    else if (customColor && customWord.trim()) go(customWord.trim(), customColor)
+    else go(null, null)
+  }
 
   return (
     <div style={{
@@ -153,8 +229,8 @@ function MobileMoodScreen() {
           ))}
         </div>
         <button
-          onClick={() => go(selected, note)}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 17 : 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+          onClick={handleGo}
+          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 17 : 14, color: canContinue ? 'var(--ink-900)' : 'var(--ink-400)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
         >Next</button>
       </div>
 
@@ -167,7 +243,7 @@ function MobileMoodScreen() {
           How would you<br />describe today<span style={{ color: 'var(--terra-300)' }}>?</span>
         </h1>
         <p style={{ fontFamily: 'var(--serif)', fontSize: t ? 20 : 16, fontStyle: 'italic', color: 'var(--ink-500)', marginTop: 12 }}>
-          Pick one. There's no wrong answer.
+          Pick one, or name your own.
         </p>
       </div>
 
@@ -176,13 +252,14 @@ function MobileMoodScreen() {
         padding: t ? '56px 56px 0' : '50px 32px 0',
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: t ? 28 : 20,
         justifyItems: 'center',
+        opacity: customColor ? 0.45 : 1, transition: 'opacity 0.15s',
       }}>
         {MOODS.map(mood => {
           const isSelected = selected === mood.name
           return (
             <button
               key={mood.name}
-              onClick={() => setSelected(mood.name)}
+              onClick={() => handlePreset(mood.name)}
               style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: t ? 14 : 10, padding: 0 }}
             >
               <div style={{
@@ -214,16 +291,31 @@ function MobileMoodScreen() {
         })}
       </div>
 
-      {/* Optional word */}
-      <div style={{ padding: t ? '52px 56px 0' : '48px 32px 0' }}>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 1.6, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: 8 }}>
-          One word for today (optional)
+      {/* Divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: t ? '48px 56px 0' : '40px 32px 0' }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
+        <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: t ? 16 : 13, color: 'var(--ink-400)', whiteSpace: 'nowrap' }}>or name your own</span>
+        <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} />
+      </div>
+
+      {/* Custom mood builder */}
+      <div style={{ padding: t ? '24px 56px 0' : '20px 32px 0', opacity: selected ? 0.45 : 1, transition: 'opacity 0.15s' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: t ? 10 : 8, marginBottom: t ? 16 : 12 }}>
+          {PALETTE.map(hex => (
+            <ColorSwatch key={hex} hex={hex} selected={customColor === hex} onSelect={handleSwatch} />
+          ))}
         </div>
-        <div style={{ padding: '14px 16px', background: 'var(--bg-paper)', borderRadius: 14 }}>
+        <div style={{
+          padding: t ? '16px 20px' : '14px 16px',
+          background: 'var(--bg-paper)', borderRadius: 14,
+          border: `1.5px solid ${customColor || 'var(--hairline)'}`,
+          transition: 'border-color 0.15s',
+        }}>
           <input
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            placeholder="gentle, slow, golden…"
+            value={customWord}
+            onChange={e => setCustomWord(e.target.value)}
+            placeholder="one word for today…"
+            maxLength={32}
             style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: t ? 19 : 16, color: 'var(--ink-900)' }}
           />
         </div>
@@ -232,12 +324,16 @@ function MobileMoodScreen() {
       {/* CTA */}
       <div style={{ padding: t ? '40px 56px 56px' : '32px 24px 48px' }}>
         <button
-          onClick={() => go(selected, note)}
+          onClick={handleGo}
+          disabled={!canContinue}
           style={{
             width: '100%', padding: t ? '20px' : '16px',
-            background: 'var(--ink-900)', color: 'var(--bg-paper)',
+            background: canContinue ? 'var(--ink-900)' : 'var(--hairline-strong)',
+            color: canContinue ? 'var(--bg-paper)' : 'var(--ink-400)',
             border: 'none', borderRadius: 18,
-            fontFamily: 'var(--sans)', fontSize: t ? 18 : 15, fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'var(--sans)', fontSize: t ? 18 : 15, fontWeight: 600,
+            cursor: canContinue ? 'pointer' : 'default',
+            transition: 'background 0.15s, color 0.15s',
           }}
         >Continue to writing</button>
       </div>

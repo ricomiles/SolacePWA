@@ -17,19 +17,22 @@ const MOOD_COLORS = {
   heavy: '#8B7E6E',
 }
 
-function getMoodDot(mood) {
+function getMoodDot(mood, moodColor) {
+  if (moodColor) return moodColor
   return MOOD_COLORS[mood] || 'var(--ink-300)'
 }
 
 function useEntryWriter() {
   const location = useLocation()
   const initialMood = location.state?.mood || null
+  const initialMoodColor = location.state?.moodColor || null
   const initialPrompt = location.state?.promptText || null
   const { createEntry } = useEntries()
 
   const [title, setTitle] = useState(location.state?.title || '')
   const [body, setBody] = useState(location.state?.body || '')
   const [mood, setMood] = useState(initialMood)
+  const [moodColor, setMoodColor] = useState(initialMoodColor)
   const [savedAt, setSavedAt] = useState(null)
   const [saving, setSaving] = useState(false)
   const [wordCount, setWordCount] = useState(0)
@@ -52,7 +55,7 @@ function useEntryWriter() {
     try {
       if (!entryIdRef.current) {
         isCreatingRef.current = true
-        const entry = await createEntry({ title, body, mood, prompt })
+        const entry = await createEntry({ title, body, mood, moodColor, prompt })
         entryIdRef.current = entry.id
         isCreatingRef.current = false
       }
@@ -64,20 +67,20 @@ function useEntryWriter() {
     } finally {
       setSaving(false)
     }
-  }, [title, body, mood, createEntry])
+  }, [title, body, mood, moodColor, createEntry])
 
   useEffect(() => {
     isDirtyRef.current = true
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     autoSaveTimer.current = setTimeout(doSave, AUTO_SAVE_INTERVAL)
     return () => clearTimeout(autoSaveTimer.current)
-  }, [title, body, mood]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [title, body, mood, moodColor]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const savedLabel = savedAt
     ? `saved · ${Math.round((Date.now() - savedAt.getTime()) / 60000) || '<1'}m ago`
     : saving ? 'saving…' : 'unsaved'
 
-  return { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedAt, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer }
+  return { title, setTitle, body, setBody, mood, setMood, moodColor, setMoodColor, prompt, saving, savedAt, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer }
 }
 
 // ── Daily prompt banner ───────────────────────────────────────────────────────
@@ -133,7 +136,7 @@ function PromptBanner({ compact = false }) {
 function DesktopWritingPane() {
   const navigate = useNavigate()
   const bp = useBreakpoint()
-  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, moodColor, setMoodColor, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const [focusMode, setFocusMode] = useState(false)
 
   const now = new Date()
@@ -179,7 +182,7 @@ function DesktopWritingPane() {
               <>
                 <span>·</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood) }} />
+                  <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood, moodColor) }} />
                   {mood}
                 </span>
               </>
@@ -241,7 +244,7 @@ function DesktopWritingPane() {
             >
               {mood ? (
                 <>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood) }} />
+                  <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood, moodColor) }} />
                   {mood}
                 </>
               ) : '+ mood'}
@@ -298,7 +301,7 @@ function DesktopWritingPane() {
 // ── Mobile writing view ────────────────────────────────────────────────────────
 function MobileWritingView() {
   const navigate = useNavigate()
-  const { title, setTitle, body, setBody, mood, setMood, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
+  const { title, setTitle, body, setBody, mood, setMood, moodColor, setMoodColor, prompt, saving, savedLabel, wordCount, doSave, entryIdRef, autoSaveTimer } = useEntryWriter()
   const { isTabletPortrait: t } = useBreakpoint()
   const scrollRef = useRef(null)
 
@@ -380,7 +383,7 @@ function MobileWritingView() {
           >
             {mood ? (
               <>
-                <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood) }} />
+                <span style={{ width: 6, height: 6, borderRadius: 3, background: getMoodDot(mood, moodColor) }} />
                 {mood}
               </>
             ) : '+ mood'}
