@@ -134,8 +134,12 @@ export default function Settings() {
   }
 
   const [reminderEnabled, setReminderEnabled] = useState(false)
-  const [reminderTime, setReminderTime] = useState('21:00')
-  const [streakNudge, setStreakNudge] = useState(false)
+  const [reminderTime, setReminderTime] = useState(
+    () => localStorage.getItem('solace_reminder_time') || '21:00'
+  )
+  const [streakNudge, setStreakNudge] = useState(
+    () => localStorage.getItem('solace_streak_nudge') === 'true'
+  )
   const [reminderLoading, setReminderLoading] = useState(false)
 
   useEffect(() => {
@@ -143,8 +147,14 @@ export default function Settings() {
     Promise.all([isSubscribed(), fetchSubscription(user.id)]).then(([subscribed, row]) => {
       setReminderEnabled(subscribed)
       if (row) {
-        setReminderTime(row.reminder_time)
+        // row.reminder_time is stored as UTC — convert back to local for display
+        const [h] = row.reminder_time.split(':').map(Number)
+        const d = new Date(); d.setUTCHours(h, 0, 0, 0)
+        const localTime = d.getHours().toString().padStart(2, '0') + ':00'
+        setReminderTime(localTime)
+        localStorage.setItem('solace_reminder_time', localTime)
         setStreakNudge(row.streak_nudge)
+        localStorage.setItem('solace_streak_nudge', row.streak_nudge ? 'true' : 'false')
       }
     }).catch(() => {})
   }, [user])
@@ -168,6 +178,7 @@ export default function Settings() {
 
   const handleReminderTimeChange = async (val) => {
     setReminderTime(val)
+    localStorage.setItem('solace_reminder_time', val)
     if (reminderEnabled) {
       try { await updateReminderSettings(user.id, val, streakNudge) } catch { /* ignore */ }
     }
@@ -175,6 +186,7 @@ export default function Settings() {
 
   const handleStreakNudgeToggle = async (val) => {
     setStreakNudge(val)
+    localStorage.setItem('solace_streak_nudge', val ? 'true' : 'false')
     if (reminderEnabled) {
       try { await updateReminderSettings(user.id, reminderTime, val) } catch { /* ignore */ }
     }
