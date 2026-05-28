@@ -275,27 +275,43 @@ function MobileEditView({ id }) {
     <div style={{ flex: 1, background: 'var(--bg-paper)', display: 'flex', flexDirection: 'column' }}>
       <StatusBar />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: t ? '28px 56px 0' : '20px 24px 0', flexShrink: 0 }}>
-        <button
-          onClick={handleClose}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M9 2L4 7l5 5" stroke="var(--ink-500)" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          Close
-        </button>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: saving ? 'var(--terra-200)' : 'var(--terra-300)', display: 'inline-block' }} />
-          {savedLabel}
+      {/* Top bar */}
+      <div style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: t ? '28px 56px 12px' : '20px 24px 10px' }}>
+          <button
+            onClick={handleClose}
+            style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-500)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M9 2L4 7l5 5" stroke="var(--ink-500)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            Close
+          </button>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, color: 'var(--terra-400)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: saving ? 'var(--terra-200)' : 'var(--terra-300)', display: 'inline-block' }} />
+            {savedLabel}
+          </div>
+          <button
+            onClick={handleDone}
+            style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
+          >Done</button>
         </div>
-        <button
-          onClick={handleDone}
-          style={{ background: 'transparent', border: 'none', fontFamily: 'var(--sans)', fontSize: t ? 18 : 14, color: 'var(--ink-900)', fontWeight: 600, cursor: 'pointer' }}
-        >Done</button>
+
+        {/* Formatting strip */}
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          padding: t ? '4px 48px 4px 48px' : '4px 16px 4px 16px',
+          borderTop: '1px solid var(--hairline)', borderBottom: '1px solid var(--hairline)',
+        }}>
+          <FormattingToolbar editor={editor} size={36} />
+          <div style={{ flex: 1 }} />
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, letterSpacing: 0.4 }}>
+            {wordCount} words
+          </div>
+        </div>
       </div>
 
-      <div className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 120px' : '36px 32px 120px' }}>
+      <div className="page-scroll" style={{ flex: 1, padding: t ? '52px 72px 80px' : '36px 32px 80px' }}>
         <div style={{ maxWidth: t ? 720 : undefined, margin: t ? '0 auto' : undefined }}>
         <div style={{ fontFamily: 'var(--sans)', fontSize: t ? 13 : 11, letterSpacing: 2, color: 'var(--ink-500)', textTransform: 'uppercase', fontWeight: 700, marginBottom: t ? 22 : 14 }}>
           {dateLabel} · {timeOfDay}
@@ -329,11 +345,6 @@ function MobileEditView({ id }) {
           />
         )}
         </div>
-      </div>
-
-      <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', width: 'min(calc(100% - 32px), 398px)', padding: '6px 14px', background: 'var(--bg-cream)', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(58,51,43,0.06)', zIndex: 30 }}>
-        <FormattingToolbar editor={editor} size={36} />
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--ink-500)', fontWeight: 600, letterSpacing: 0.4 }}>{wordCount} words</div>
       </div>
 
       <HomeIndicator />
