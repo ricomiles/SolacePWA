@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { hasKey } from './store/cryptoStore'
+import { useTheme } from './hooks/useTheme'
 import AppLayout from './components/AppLayout'
 
 import Welcome from './pages/Welcome'
@@ -64,6 +65,7 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useTheme()
   return (
     <BrowserRouter>
       <AuthProvider>

@@ -5,6 +5,7 @@ import { clearKey } from '../store/cryptoStore'
 import { useAuth } from '../hooks/useAuth'
 import { useEntries } from '../hooks/useEntries'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useTheme, THEMES } from '../hooks/useTheme'
 import { requestPermission, subscribeToPush, unsubscribeFromPush, updateReminderSettings, fetchSubscription, isSubscribed } from '../services/notifications'
 import db from '../db'
 import StatusBar from '../components/StatusBar'
@@ -198,6 +199,8 @@ export default function Settings() {
     }
   }
 
+  const { theme, setTheme } = useTheme()
+
   const initial = user?.email?.[0]?.toUpperCase() || 'J'
   const entryCount = entries.length
   const wordCount = entries.reduce((sum, e) => sum + (e.wordCount || 0), 0)
@@ -281,6 +284,46 @@ export default function Settings() {
             ))}
           </div>
         </div>
+
+        <Card header="Appearance" t={t}>
+          <div style={{
+            padding: t ? '24px 28px 20px' : '18px 20px 14px',
+            display: 'flex',
+            justifyContent: 'space-around',
+          }}>
+            {THEMES.map(th => {
+              const selected = theme === th.id
+              return (
+                <button
+                  key={th.id}
+                  onClick={() => setTheme(th.id)}
+                  aria-label={th.label}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: t ? 8 : 6,
+                    background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+                  }}
+                >
+                  <div style={{
+                    width: t ? 56 : 44, height: t ? 56 : 44,
+                    borderRadius: '50%',
+                    background: th.bg,
+                    border: `2px solid ${th.accent}`,
+                    boxShadow: selected ? `0 0 0 2.5px var(--ink-900)` : 'none',
+                    transition: 'box-shadow 0.15s',
+                  }} />
+                  <span style={{
+                    fontFamily: 'var(--sans)',
+                    fontSize: t ? 12 : 10,
+                    color: selected ? 'var(--ink-900)' : 'var(--ink-500)',
+                    fontWeight: selected ? 600 : 400,
+                    letterSpacing: 0.3,
+                  }}>{th.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </Card>
 
         <Card header="Practice" t={t}>
           <Row t={t} icon={{ bg: 'var(--terra-100)', fg: 'var(--terra-400)', glyph: 'p' }} title="Daily prompt" checked={promptEnabled} onToggle={handlePromptToggle} />

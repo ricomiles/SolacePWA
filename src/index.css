@@ -33,6 +33,132 @@
   --sans: 'Mulish', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
+[data-theme="sage"] {
+  --bg-cream: #ECF0E6;
+  --bg-paper: #F4F7F0;
+  --bg-warm: #E2E8D8;
+  --bg-deep: #D5DCCA;
+  --terra-50: #E0EBD4;
+  --terra-100: #C8D8B4;
+  --terra-200: #8AAA70;
+  --terra-300: #6C8C58;
+  --terra-400: #507040;
+  --sage-100: #D2DCC6;
+  --sage-200: #AABBA0;
+  --ink-900: #2A3324;
+  --ink-700: #3E4E35;
+  --ink-500: #607050;
+  --ink-300: #92A082;
+  --ink-200: #BFCAB4;
+  --hairline: rgba(42, 51, 36, 0.08);
+  --hairline-strong: rgba(42, 51, 36, 0.14);
+}
+
+[data-theme="dusk"] {
+  --bg-cream: #F2EBF0;
+  --bg-paper: #FAF5F8;
+  --bg-warm: #EAE0EB;
+  --bg-deep: #E0D4E4;
+  --terra-50: #EEE4F4;
+  --terra-100: #DDD0EC;
+  --terra-200: #B89CC8;
+  --terra-300: #9878B0;
+  --terra-400: #785898;
+  --sage-100: #E0D8E4;
+  --sage-200: #CABCD0;
+  --ink-900: #32283C;
+  --ink-700: #4E4060;
+  --ink-500: #6E6080;
+  --ink-300: #A098B0;
+  --ink-200: #CAC4D4;
+  --hairline: rgba(50, 40, 60, 0.08);
+  --hairline-strong: rgba(50, 40, 60, 0.14);
+}
+
+[data-theme="slate"] {
+  --bg-cream: #E8EEF5;
+  --bg-paper: #F3F6FB;
+  --bg-warm: #DDE5F0;
+  --bg-deep: #D0DAE8;
+  --terra-50: #DCE8F4;
+  --terra-100: #C0D0E8;
+  --terra-200: #7AACC8;
+  --terra-300: #5888B0;
+  --terra-400: #3A6890;
+  --sage-100: #D4DEE8;
+  --sage-200: #AABCCC;
+  --ink-900: #24303E;
+  --ink-700: #3A4E60;
+  --ink-500: #5A6E80;
+  --ink-300: #8AA0B0;
+  --ink-200: #B4C6D4;
+  --hairline: rgba(36, 48, 62, 0.08);
+  --hairline-strong: rgba(36, 48, 62, 0.14);
+}
+
+[data-theme="rose"] {
+  --bg-cream: #F4EAE8;
+  --bg-paper: #FAF4F2;
+  --bg-warm: #ECE0DC;
+  --bg-deep: #E2D0CC;
+  --terra-50: #F2E4DF;
+  --terra-100: #E8C8C0;
+  --terra-200: #C88880;
+  --terra-300: #AB6868;
+  --terra-400: #8A5050;
+  --sage-100: #E8D8D4;
+  --sage-200: #D0B8B2;
+  --ink-900: #3C2A28;
+  --ink-700: #5C4240;
+  --ink-500: #7C6260;
+  --ink-300: #A89088;
+  --ink-200: #CABAB8;
+  --hairline: rgba(60, 42, 40, 0.08);
+  --hairline-strong: rgba(60, 42, 40, 0.14);
+}
+
+[data-theme="petal"] {
+  --bg-cream: #F5EBF0;
+  --bg-paper: #FBF4F8;
+  --bg-warm: #EEE0E8;
+  --bg-deep: #E4D0DC;
+  --terra-50: #F4E4EC;
+  --terra-100: #ECCCD8;
+  --terra-200: #D07898;
+  --terra-300: #B05878;
+  --terra-400: #8C4060;
+  --sage-100: #E8D4DC;
+  --sage-200: #D0B8C4;
+  --ink-900: #3A2430;
+  --ink-700: #5C3C50;
+  --ink-500: #7C5C70;
+  --ink-300: #A88898;
+  --ink-200: #CAB8C4;
+  --hairline: rgba(58, 36, 48, 0.08);
+  --hairline-strong: rgba(58, 36, 48, 0.14);
+}
+
+[data-theme="midnight"] {
+  --bg-cream: #1C1A16;
+  --bg-paper: #242018;
+  --bg-warm: #2C2820;
+  --bg-deep: #342F26;
+  --terra-50: #302C22;
+  --terra-100: #44402E;
+  --terra-200: #9E8660;
+  --terra-300: #BAA07A;
+  --terra-400: #D4BC98;
+  --sage-100: #2E2C26;
+  --sage-200: #46423C;
+  --ink-900: #F0E6D8;
+  --ink-700: #D0C4B0;
+  --ink-500: #A89880;
+  --ink-300: #706860;
+  --ink-200: #504840;
+  --hairline: rgba(240, 230, 216, 0.08);
+  --hairline-strong: rgba(240, 230, 216, 0.12);
+}
+
 *,
 *::before,
 *::after {
