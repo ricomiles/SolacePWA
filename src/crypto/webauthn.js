@@ -21,10 +21,11 @@ export async function isBiometricAvailable() {
 
 // Enroll a new platform credential (Face ID / Touch ID) and get the first PRF output.
 // Returns { credentialId: base64, prfBytes: Uint8Array, prfSupported: bool }
-export async function enrollBiometric(userId) {
+export async function enrollBiometric() {
   const challenge = crypto.getRandomValues(new Uint8Array(32))
-  // user.id must be ≤ 64 bytes
-  const userBytes = new TextEncoder().encode(userId).slice(0, 64)
+  // Random per-enrollment user handle so enrolling on a second device never
+  // replaces an existing passkey (WebAuthn replaces on same RP ID + user handle).
+  const userHandle = crypto.getRandomValues(new Uint8Array(16))
 
   let cred
   try {
@@ -32,7 +33,7 @@ export async function enrollBiometric(userId) {
       publicKey: {
         challenge,
         rp: { name: 'Solace Journal', id: RP_ID },
-        user: { id: userBytes, name: 'solace-user', displayName: 'You' },
+        user: { id: userHandle, name: 'solace-user', displayName: 'You' },
         pubKeyCredParams: [
           { type: 'public-key', alg: -7 },   // ES256
           { type: 'public-key', alg: -257 },  // RS256
@@ -64,11 +65,7 @@ export async function enrollBiometric(userId) {
 }
 
 // Assert an existing credential (triggers Face ID / Touch ID) and return PRF output.
-// Uses discoverable credential lookup (no allowCredentials) so the system can find
-// the passkey even if the stored credential ID drifts (e.g. after reinstall or
-// iCloud Keychain sync). Security is preserved: the PRF output is credential-bound,
-// so unwrapDEK will fail if the wrong passkey is used.
-export async function assertBiometric() {
+export async function assertBiometric(credentialIdBase64) {
   const challenge = crypto.getRandomValues(new Uint8Array(32))
 
   let assertion
@@ -77,6 +74,7 @@ export async function assertBiometric() {
       publicKey: {
         challenge,
         rpId: RP_ID,
+        allowCredentials: [{ type: 'public-key', id: base64ToUint8Array(credentialIdBase64) }],
         userVerification: 'required',
         extensions: {
           prf: { eval: { first: PRF_EVAL_INPUT } },

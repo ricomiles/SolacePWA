@@ -91,7 +91,7 @@ export default function BiometricSetup() {
     try {
       const rawDEK = getRawDEK()
       if (!rawDEK) throw new Error('Key not found — please re-enter your phrase.')
-      const { credentialId, prfBytes, prfSupported } = await enrollBiometric(user.id)
+      const { credentialId, prfBytes, prfSupported } = await enrollBiometric()
       if (!prfSupported) {
         // PRF not supported despite platform authenticator being available — fall back to PIN
         setStep('pin-set')
